@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui";
+import { Button, ShareModal } from "@/components/ui";
 import Link from "next/link";
 import Image from "next/image";
 import { v4 as uuidv4 } from "uuid";
@@ -32,6 +32,7 @@ export default function CreateRoomPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [location, setLocation] = useState<LocationData | null>(null);
 
   useEffect(() => {
@@ -141,27 +142,9 @@ export default function CreateRoomPage() {
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!roomCode) return;
-
-    const shareData = {
-      title: "Join my Rescho Room!",
-      text: `Join my restaurant matching room on Rescho! Use code: ${roomCode}`,
-      url: `${window.location.origin}/room/join?code=${roomCode}`,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        if ((err as Error).name !== "AbortError") {
-          console.error("Share failed:", err);
-        }
-      }
-    } else {
-      // Fallback: Copy to clipboard (already handled by Copy button, but we can alert or show a message)
-      copyCode();
-    }
+    setIsShareModalOpen(true);
   };
 
   const startSwiping = () => {
@@ -213,10 +196,10 @@ export default function CreateRoomPage() {
         {/* Back Button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-8 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/[0.05] hover:border-white/[0.1] text-text-secondary hover:text-white transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.05)] active:scale-95 mb-8 w-fit group"
         >
-          <ChevronLeft className="w-5 h-5" />
-          Back
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-sm font-medium font-display">Back</span>
         </Link>
 
         <motion.div
@@ -324,6 +307,16 @@ export default function CreateRoomPage() {
           </p>
         </motion.div>
       </div>
+
+      {/* Share Modal */}
+      {roomCode && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          roomCode={roomCode}
+          url={typeof window !== "undefined" ? `${window.location.origin}/room/join?code=${roomCode}` : ""}
+        />
+      )}
     </main>
   );
 }

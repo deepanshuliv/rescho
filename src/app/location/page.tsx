@@ -12,6 +12,7 @@ import {
   MapPin,
   Info,
   Check,
+  Globe,
 } from "lucide-react";
 
 interface LocationData {
@@ -22,12 +23,12 @@ interface LocationData {
 
 // Popular cities for quick selection
 const POPULAR_CITIES: LocationData[] = [
-  { name: "New York", lat: 40.7128, lng: -74.006 },
-  { name: "Los Angeles", lat: 34.0522, lng: -118.2437 },
-  { name: "London", lat: 51.5074, lng: -0.1278 },
+  { name: "Delhi", lat: 28.6139, lng: 77.209 },
   { name: "Mumbai", lat: 19.076, lng: 72.8777 },
-  { name: "Tokyo", lat: 35.6762, lng: 139.6503 },
-  { name: "San Francisco", lat: 37.7749, lng: -122.4194 },
+  { name: "Bengaluru", lat: 12.9716, lng: 77.5946 },
+  { name: "Pune", lat: 18.5204, lng: 73.8567 },
+  { name: "Hyderabad", lat: 17.385, lng: 78.4867 },
+  { name: "Chennai", lat: 13.0827, lng: 80.2707 },
 ];
 
 function LocationContent() {
@@ -240,10 +241,10 @@ function LocationContent() {
         {/* Back Button */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-text-secondary hover:text-text-primary mb-8 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/[0.05] hover:border-white/[0.1] text-text-secondary hover:text-white transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.05)] active:scale-95 mb-8 w-fit group"
         >
-          <ChevronLeft className="w-5 h-5" />
-          Back
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          <span className="text-sm font-medium font-display">Back</span>
         </Link>
 
         <motion.div
@@ -301,7 +302,13 @@ function LocationContent() {
 
           {/* Popular Cities */}
           <div className="mb-6">
-            <div className="text-xs text-text-muted mb-2 font-medium">Popular cities:</div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs text-text-muted font-medium">Popular cities (India):</div>
+              <div className="flex items-center gap-1.5 text-[10px] text-accent-primary font-medium px-2.5 py-1 rounded-full border border-accent-primary/20 bg-accent-primary/10">
+                <Globe className="w-3 h-3" />
+                Global Search Supported
+              </div>
+            </div>
             <div className="flex flex-wrap gap-2">
               {POPULAR_CITIES.map((city) => (
                 <button
