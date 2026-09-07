@@ -251,10 +251,10 @@ function LocationContent() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold mb-2">
-            Choose Your <span className="text-accent-primary">Location</span>
+          <h1 className="text-3xl font-bold font-display mb-2">
+            Choose Your <span className="gradient-text-primary">Location</span>
           </h1>
-          <p className="text-text-secondary mb-6">
+          <p className="text-text-secondary mb-6 text-sm">
             Where do you want to find restaurants?
           </p>
 
@@ -263,7 +263,7 @@ function LocationContent() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-secondary/10 border border-accent-secondary/30 rounded-xl p-3 mb-4 text-accent-secondary text-sm"
+              className="bg-accent-secondary/10 border border-accent-secondary/20 rounded-2xl p-3.5 mb-4 text-accent-secondary text-sm"
             >
               <div className="flex items-start gap-2">
                 <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -283,7 +283,7 @@ function LocationContent() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && searchLocation()}
-              className="flex-1 bg-bg-secondary border border-bg-tertiary rounded-xl px-4 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary/50 transition-colors"
+              className="flex-1 bg-bg-secondary/90 border border-white/[0.06] rounded-2xl px-4 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary/50 transition-colors"
             />
             <Button
               variant="primary"
@@ -300,17 +300,17 @@ function LocationContent() {
           </div>
 
           {/* Popular Cities */}
-          <div className="mb-4">
-            <div className="text-xs text-text-muted mb-2">Popular cities:</div>
+          <div className="mb-6">
+            <div className="text-xs text-text-muted mb-2 font-medium">Popular cities:</div>
             <div className="flex flex-wrap gap-2">
               {POPULAR_CITIES.map((city) => (
                 <button
                   key={city.name}
                   onClick={() => selectCity(city)}
-                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold font-display transition-all ${
                     location?.name === city.name
-                      ? "bg-accent-primary text-bg-primary font-medium"
-                      : "bg-bg-secondary text-text-secondary hover:bg-bg-tertiary hover:text-text-primary"
+                      ? "bg-accent-primary text-white shadow-[0_4px_16px_rgba(255,58,92,0.3)]"
+                      : "bg-bg-secondary/80 text-text-secondary hover:bg-bg-tertiary hover:text-text-primary border border-white/[0.03]"
                   }`}
                 >
                   {city.name}
@@ -323,29 +323,29 @@ function LocationContent() {
           {!isInIframe && (
             <>
               <div className="flex items-center gap-4 my-4">
-                <div className="flex-1 h-px bg-bg-tertiary" />
-                <span className="text-text-muted text-sm">or</span>
-                <div className="flex-1 h-px bg-bg-tertiary" />
+                <div className="flex-1 h-px bg-white/[0.06]" />
+                <span className="text-text-muted text-xs uppercase tracking-wider">or</span>
+                <div className="flex-1 h-px bg-white/[0.06]" />
               </div>
 
               {/* Detect Location Button */}
               <button
                 onClick={detectLocation}
                 disabled={isDetecting}
-                className="w-full p-4 bg-bg-secondary rounded-xl border border-bg-tertiary hover:border-accent-primary/50 transition-all mb-4 flex items-center gap-4"
+                className="w-full p-4 bg-bg-secondary/70 rounded-2xl border border-white/[0.04] hover:border-accent-primary/30 transition-all mb-4 flex items-center gap-4 group"
               >
-                <div className="w-12 h-12 rounded-full bg-accent-primary/10 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
                   {isDetecting ? (
-                    <Loader2 className="w-6 h-6 text-accent-primary animate-spin" />
+                    <Loader2 className="w-5 h-5 text-accent-primary animate-spin" />
                   ) : (
-                    <MapPin className="w-6 h-6 text-accent-primary" />
+                    <MapPin className="w-5 h-5 text-accent-primary" />
                   )}
                 </div>
                 <div className="text-left flex-1">
-                  <div className="font-semibold text-text-primary">
+                  <div className="font-semibold text-text-primary font-display text-sm">
                     Use Current Location
                   </div>
-                  <div className="text-sm text-text-secondary">
+                  <div className="text-xs text-text-muted">
                     {isDetecting ? "Detecting..." : "Auto-detect your location"}
                   </div>
                 </div>
@@ -358,7 +358,7 @@ function LocationContent() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-error/10 border border-accent-error/30 rounded-xl p-3 mb-4 text-accent-error text-sm"
+              className="bg-accent-error/10 border border-accent-error/20 rounded-2xl p-3 mb-4 text-accent-error text-xs"
             >
               {error}
             </motion.div>
@@ -369,14 +369,14 @@ function LocationContent() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-accent-primary/10 border border-accent-primary/30 rounded-xl p-4 mb-6"
+              className="bg-accent-primary/10 border border-accent-primary/20 rounded-2xl p-4 mb-6"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-accent-primary/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-accent-primary/20 flex items-center justify-center">
                   <Check className="w-5 h-5 text-accent-primary" />
                 </div>
                 <div>
-                  <div className="font-semibold text-accent-primary">
+                  <div className="font-semibold text-accent-primary font-display">
                     {location.name}
                   </div>
                   <div className="text-xs text-text-secondary">

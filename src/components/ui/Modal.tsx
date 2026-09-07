@@ -50,19 +50,19 @@ export default function Modal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
-              className="bg-bg-secondary rounded-2xl border border-bg-tertiary max-w-md w-full max-h-[90vh] overflow-y-auto"
+              className="bg-bg-secondary/95 backdrop-blur-2xl rounded-3xl border border-white/[0.06] max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {title && (
-                <div className="flex items-center justify-between p-4 border-b border-bg-tertiary">
-                  <h2 className="text-xl font-bold text-text-primary">
+                <div className="flex items-center justify-between p-4 border-b border-white/[0.04]">
+                  <h2 className="text-xl font-bold font-display text-text-primary">
                     {title}
                   </h2>
                   <button
                     onClick={onClose}
                     className="text-text-secondary hover:text-text-primary transition-colors p-1"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               )}

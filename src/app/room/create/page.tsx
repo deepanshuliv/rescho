@@ -5,14 +5,15 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui";
 import Link from "next/link";
+import Image from "next/image";
 import { v4 as uuidv4 } from "uuid";
+import { useUser } from "@clerk/nextjs";
 import {
   ChevronLeft,
   AlertTriangle,
   Check,
   Copy,
   MapPin,
-  User,
   Plus,
   Share2,
 } from "lucide-react";
@@ -25,6 +26,7 @@ interface LocationData {
 
 export default function CreateRoomPage() {
   const router = useRouter();
+  const { user } = useUser();
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [roomId, setRoomId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -223,10 +225,10 @@ export default function CreateRoomPage() {
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold mb-2">
-            Room <span className="text-accent-primary">Created!</span>
+          <h1 className="text-3xl font-bold font-display mb-2">
+            Room <span className="gradient-text-primary">Created!</span>
           </h1>
-          <p className="text-text-secondary mb-8">
+          <p className="text-text-secondary text-sm mb-8">
             Share this code with your partner to join
           </p>
 
@@ -235,7 +237,7 @@ export default function CreateRoomPage() {
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="bg-bg-secondary rounded-2xl border border-accent-primary/30 p-8 mb-6"
+            className="bg-bg-secondary/80 rounded-3xl border border-white/[0.06] p-8 mb-6 backdrop-blur-xl shadow-2xl"
           >
             <div className="text-5xl font-mono font-bold tracking-[0.3em] text-accent-primary mb-4">
               {roomCode}
@@ -244,16 +246,16 @@ export default function CreateRoomPage() {
               <Button
                 variant="ghost"
                 onClick={copyCode}
-                className="text-text-secondary hover:text-accent-primary"
+                className="text-text-secondary hover:text-accent-primary text-xs"
               >
                 {copied ? (
                   <>
-                    <Check className="w-5 h-5 mr-2" />
+                    <Check className="w-4 h-4 mr-1.5" />
                     Copied!
                   </>
                 ) : (
                   <>
-                    <Copy className="w-5 h-5 mr-2" />
+                    <Copy className="w-4 h-4 mr-1.5" />
                     Copy Code
                   </>
                 )}
@@ -261,9 +263,9 @@ export default function CreateRoomPage() {
               <Button
                 variant="ghost"
                 onClick={handleShare}
-                className="text-text-secondary hover:text-accent-primary"
+                className="text-text-secondary hover:text-accent-primary text-xs"
               >
-                <Share2 className="w-5 h-5 mr-2" />
+                <Share2 className="w-4 h-4 mr-1.5" />
                 Share
               </Button>
             </div>
@@ -272,12 +274,12 @@ export default function CreateRoomPage() {
           {/* Location Info */}
           {location && (
             <div className="flex items-center justify-center gap-2 text-sm text-text-secondary mb-8">
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-4 h-4 text-accent-primary" />
               <span>{location.name}</span>
             </div>
           )}
 
-          {/* Waiting Animation */}
+          {/* Waiting Animation with Human Image */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -285,21 +287,25 @@ export default function CreateRoomPage() {
             className="mb-8"
           >
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-accent-primary/20 flex items-center justify-center">
-                <User className="w-6 h-6 text-accent-primary" />
+              <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-accent-primary/40 shadow-lg bg-bg-tertiary">
+                <img
+                  src={user?.imageUrl || "/avatars/avatar-user.webp"}
+                  alt={user?.firstName || "You"}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <motion.div
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-text-muted"
+                className="text-text-muted text-sm font-bold tracking-widest"
               >
                 • • •
               </motion.div>
-              <div className="w-12 h-12 rounded-full bg-bg-tertiary border-2 border-dashed border-text-muted flex items-center justify-center">
-                <Plus className="w-6 h-6 text-text-muted" />
+              <div className="w-12 h-12 rounded-full bg-bg-tertiary/60 border border-white/[0.08] flex items-center justify-center">
+                <Plus className="w-5 h-5 text-text-muted" />
               </div>
             </div>
-            <p className="text-text-secondary text-sm">
+            <p className="text-text-secondary text-xs">
               Waiting for partner to join...
             </p>
           </motion.div>

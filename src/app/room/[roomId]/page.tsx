@@ -7,10 +7,10 @@ import { SwipeStack, MatchModal } from "@/components/swipe";
 import { Button } from "@/components/ui";
 import { Restaurant } from "@/types";
 import Link from "next/link";
+import Image from "next/image";
 import {
   X,
   Heart,
-  User,
   Plus,
   Eye,
   AlertTriangle,
@@ -340,13 +340,13 @@ export default function SwipePage() {
   return (
     <main className="min-h-screen flex flex-col bg-bg-primary">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-bg-tertiary">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
         {/* Left spacer to keep room code centred */}
         <div className="w-10" />
 
         <div className="flex items-center justify-center">
           <div className="text-center">
-            <div className="text-[10px] uppercase tracking-tighter text-text-muted mb-0.5">
+            <div className="text-[10px] uppercase tracking-wider text-text-muted mb-0.5 font-medium font-display">
               Room Code
             </div>
             <div className="flex items-center gap-2">
@@ -381,7 +381,7 @@ export default function SwipePage() {
           >
             <Heart className="w-6 h-6" fill="currentColor" strokeWidth={0} />
             {matches.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent-primary text-white text-xs font-bold rounded-full flex items-center justify-center font-display shadow-lg shadow-accent-primary/40">
                 {matches.length}
               </span>
             )}
@@ -389,20 +389,26 @@ export default function SwipePage() {
         </div>
       </header>
 
-      {/* Partner Status */}
-      <div className="px-4 py-2.5 bg-bg-secondary border-b border-bg-tertiary">
+      {/* Partner Status with Real Human Avatars */}
+      <div className="px-4 py-2.5 bg-bg-secondary/60 backdrop-blur-md border-b border-white/[0.04]">
         <div className="flex items-center justify-center gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-accent-primary/20 flex items-center justify-center">
-              <User className="w-4 h-4 text-accent-primary" />
+            <div className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-accent-primary/40 shadow-md">
+              <Image
+                src="/avatars/avatar-user.webp"
+                alt="You"
+                fill
+                className="object-cover"
+                sizes="32px"
+              />
             </div>
-            <span className="text-sm text-text-primary font-medium">You</span>
+            <span className="text-xs text-text-primary font-semibold font-display">You</span>
           </div>
 
           <motion.div
             animate={{ opacity: [0.3, 1, 0.3] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-text-muted text-lg tracking-widest"
+            className="text-text-muted text-xs tracking-widest font-bold"
           >
             •••
           </motion.div>
@@ -415,9 +421,15 @@ export default function SwipePage() {
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
-                  className="w-8 h-8 rounded-full bg-accent-secondary/20 flex items-center justify-center"
+                  className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-accent-secondary/50 shadow-md"
                 >
-                  <User className="w-4 h-4 text-accent-secondary" />
+                  <Image
+                    src="/avatars/avatar-partner.webp"
+                    alt="Partner"
+                    fill
+                    className="object-cover"
+                    sizes="32px"
+                  />
                 </motion.div>
               ) : (
                 <motion.div
@@ -425,14 +437,14 @@ export default function SwipePage() {
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.8, opacity: 0 }}
-                  className="w-8 h-8 rounded-full bg-bg-tertiary border-2 border-dashed border-text-muted flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-bg-tertiary/60 border border-white/[0.08] flex items-center justify-center"
                 >
-                  <Plus className="w-4 h-4 text-text-muted" />
+                  <Plus className="w-3.5 h-3.5 text-text-muted" />
                 </motion.div>
               )}
             </AnimatePresence>
             <span
-              className={`text-sm font-medium ${
+              className={`text-xs font-semibold font-display ${
                 partnerConnected ? "text-text-primary" : "text-text-muted"
               }`}
             >
@@ -443,13 +455,13 @@ export default function SwipePage() {
       </div>
 
       {/* Stats Bar */}
-      <div className="flex items-center justify-center gap-6 px-4 py-2 text-sm border-b border-bg-tertiary/50">
+      <div className="flex items-center justify-center gap-6 px-4 py-2 text-xs border-b border-white/[0.03]">
         <div className="flex items-center gap-1.5 text-text-secondary">
-          <Eye className="w-4 h-4" />
+          <Eye className="w-3.5 h-3.5" />
           <span>{swipeCount} viewed</span>
         </div>
-        <div className="flex items-center gap-1.5 text-accent-primary">
-          <Heart className="w-4 h-4" fill="currentColor" strokeWidth={0} />
+        <div className="flex items-center gap-1.5 text-accent-primary font-medium">
+          <Heart className="w-3.5 h-3.5" fill="currentColor" strokeWidth={0} />
           <span>{matches.length} matches</span>
         </div>
       </div>
@@ -464,7 +476,7 @@ export default function SwipePage() {
       </div>
 
       {/* Footer Attribution */}
-      <footer className="px-4 py-2 text-center border-t border-bg-tertiary">
+      <footer className="px-4 py-2 text-center border-t border-white/[0.04]">
         <a
           href="https://foursquare.com"
           target="_blank"
@@ -498,7 +510,7 @@ export default function SwipePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 z-40"
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
               onClick={() => setShowMatches(false)}
             />
             <motion.div
@@ -506,66 +518,66 @@ export default function SwipePage() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-bg-secondary z-50 overflow-y-auto"
+              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-bg-secondary/95 backdrop-blur-2xl border-l border-white/[0.06] z-50 overflow-y-auto"
             >
-              <div className="p-4 border-b border-bg-tertiary flex items-center justify-between">
-                <h2 className="text-xl font-bold">
+              <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
+                <h2 className="text-xl font-bold font-display">
                   Matches ({matches.length})
                 </h2>
                 <button
                   onClick={() => setShowMatches(false)}
-                  className="text-text-secondary hover:text-text-primary"
+                  className="text-text-secondary hover:text-text-primary p-1"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
               {matches.length === 0 ? (
                 <div className="p-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-bg-tertiary flex items-center justify-center mx-auto mb-4">
-                    <Heart className="w-8 h-8 text-text-muted" />
+                  <div className="w-16 h-16 rounded-full bg-accent-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Heart className="w-8 h-8 text-accent-primary" />
                   </div>
-                  <p className="text-text-secondary font-medium">
+                  <p className="text-text-primary font-semibold font-display">
                     No matches yet!
                   </p>
-                  <p className="text-text-muted text-sm mt-1">
+                  <p className="text-text-muted text-xs mt-1">
                     Keep swiping to find restaurants you both like.
                   </p>
                 </div>
               ) : (
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-3">
                   {matches.map((restaurant) => (
                     <motion.div
                       key={restaurant.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-bg-tertiary rounded-xl p-4 flex gap-4"
+                      className="bg-bg-tertiary/70 rounded-2xl p-4 flex gap-4 border border-white/[0.03] hover:border-accent-primary/20 transition-all"
                     >
                       <div
-                        className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 relative flex items-center justify-center"
+                        className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 relative flex items-center justify-center shadow-md"
                         style={{
                           background:
                             restaurant.gradient ||
                             "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
                         }}
                       >
-                        <span style={{ fontSize: "36px", lineHeight: 1 }}>
+                        <span style={{ fontSize: "28px", lineHeight: 1 }}>
                           {restaurant.emoji || "🍽️"}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-text-primary truncate">
+                        <h3 className="font-bold text-text-primary font-display truncate text-sm">
                           {restaurant.name}
                         </h3>
-                        <p className="text-sm text-accent-secondary">
+                        <p className="text-xs text-accent-secondary font-medium">
                           {restaurant.cuisine}
                         </p>
                         {restaurant.priceLevel && (
-                          <p className="text-xs text-accent-primary font-medium mt-0.5">
+                          <p className="text-[11px] text-accent-primary font-medium mt-0.5">
                             {restaurant.priceLevel}
                           </p>
                         )}
-                        <p className="text-xs text-text-muted mt-1 truncate">
+                        <p className="text-[11px] text-text-muted mt-1 truncate">
                           {restaurant.address}
                         </p>
                       </div>

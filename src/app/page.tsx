@@ -9,8 +9,8 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-12 px-6 lg:px-16 border-t border-white/[0.04]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-text-muted text-sm flex items-center gap-1">
-            <span className="gradient-text-primary font-bold text-base">
+          <div className="text-text-muted text-sm flex items-center gap-1.5">
+            <span className="gradient-text-primary font-bold font-display text-base tracking-tight">
               RESCHO
             </span>{" "}
             &copy; {new Date().getFullYear()}

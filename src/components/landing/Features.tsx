@@ -34,8 +34,8 @@ export default function Features() {
               You Love
             </h2>
             <p className="text-text-secondary text-body-lg max-w-md leading-relaxed">
-              From sushi to burgers, pasta to tacos — swipe through the best
-              restaurants near you.
+              Create a room, invite your partner, and swipe through the best
+              restaurants near you together.
             </p>
           </motion.div>
 
@@ -151,17 +151,17 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-gradient-to-br from-accent-secondary/[0.08] to-bg-secondary p-5 flex flex-col justify-between min-h-[170px]"
+              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-gradient-to-br from-accent-primary/[0.08] to-bg-secondary p-5 flex flex-col justify-between min-h-[170px]"
             >
-              <div className="w-11 h-11 rounded-xl bg-accent-secondary/15 flex items-center justify-center mb-4">
+              <div className="w-11 h-11 rounded-xl bg-accent-primary/15 flex items-center justify-center mb-4">
                 <Heart
-                  className="w-5 h-5 text-accent-secondary"
+                  className="w-5 h-5 text-accent-primary"
                   fill="currentColor"
                   strokeWidth={0}
                 />
               </div>
               <div>
-                <p className="text-headline text-accent-secondary">92%</p>
+                <p className="text-headline text-accent-primary">92%</p>
                 <p className="text-text-secondary text-caption mt-1">
                   Match Success Rate
                 </p>
@@ -213,11 +213,10 @@ export default function Features() {
                 <Users className="w-6 h-6 text-accent-primary" />
               </div>
               <h3 className="text-title mb-3 text-text-primary">
-                Create or Join
+                Create &amp; Invite
               </h3>
               <p className="text-text-secondary text-body leading-relaxed">
-                Create a room and share the code with your partner, or join
-                using their code. Connect in seconds.
+                One person sets the location and creates a room. Share the unique code with your partner so they can join instantly.
               </p>
               {/* Decorative line */}
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -240,11 +239,10 @@ export default function Features() {
                 <ArrowUpDown className="w-6 h-6 text-accent-secondary" />
               </div>
               <h3 className="text-title mb-3 text-text-primary">
-                Swipe & Explore
+                Swipe Together
               </h3>
               <p className="text-text-secondary text-body leading-relaxed">
-                Swipe right on restaurants you love, left on ones you
-                don&apos;t. Browse through real local spots near you.
+                Both of you swipe through a curated list of local spots. Swipe right if you love it, left if you don&apos;t.
               </p>
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent-secondary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </motion.div>
@@ -305,8 +303,8 @@ export default function Features() {
                   <span className="gradient-text-primary">Start swiping.</span>
                 </h2>
                 <p className="text-text-secondary text-body-lg mb-8 leading-relaxed">
-                  Connect with your partner in real-time, swipe through
-                  restaurants independently, and let the algorithm find your
+                  Connect with your partner in real-time. You both swipe through
+                  the same restaurants independently, and let our algorithm find your
                   perfect match. It&apos;s that simple.
                 </p>
                 <div className="flex flex-wrap gap-4">

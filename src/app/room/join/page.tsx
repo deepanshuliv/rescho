@@ -88,16 +88,16 @@ export default function JoinRoomPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold mb-2">
-            Join a <span className="text-accent-secondary">Room</span>
+          <h1 className="text-3xl font-bold font-display mb-2">
+            Join a <span className="gradient-text-vivid">Room</span>
           </h1>
-          <p className="text-text-secondary mb-8">
+          <p className="text-text-secondary text-sm mb-8">
             Enter the 6-character code from your partner
           </p>
 
           {/* Code Input */}
           <div className="mb-6">
-            <div className="bg-bg-secondary rounded-2xl border border-bg-tertiary p-4 focus-within:border-accent-secondary/50 transition-colors">
+            <div className="bg-bg-secondary/80 rounded-3xl border border-white/[0.06] p-5 focus-within:border-accent-primary/50 transition-colors backdrop-blur-xl shadow-2xl">
               <input
                 type="text"
                 value={code}
@@ -118,7 +118,7 @@ export default function JoinRoomPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-error/10 border border-accent-error/30 rounded-xl p-3 mb-6 text-accent-error text-sm text-center"
+              className="bg-accent-error/10 border border-accent-error/20 rounded-2xl p-3 mb-6 text-accent-error text-xs text-center"
             >
               {error}
             </motion.div>
@@ -126,7 +126,7 @@ export default function JoinRoomPage() {
 
           {/* Join Button */}
           <Button
-            variant="secondary"
+            variant="primary"
             size="lg"
             onClick={joinRoom}
             disabled={code.length !== 6 || isLoading}
@@ -138,14 +138,14 @@ export default function JoinRoomPage() {
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-bg-tertiary" />
-            <span className="text-text-muted text-sm">or</span>
-            <div className="flex-1 h-px bg-bg-tertiary" />
+            <div className="flex-1 h-px bg-white/[0.06]" />
+            <span className="text-text-muted text-xs uppercase tracking-wider">or</span>
+            <div className="flex-1 h-px bg-white/[0.06]" />
           </div>
 
           {/* Create Room Link */}
           <Link href="/room/create" className="block">
-            <Button variant="ghost" className="w-full">
+            <Button variant="ghost" className="w-full text-xs">
               Create a new room instead
             </Button>
           </Link>

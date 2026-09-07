@@ -22,22 +22,16 @@ export default function SignUpPage() {
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center mb-8"
         >
-          <Link href="/" className="flex items-center gap-3 mb-4">
-            <div
-              className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg border border-white/10 overflow-hidden"
-              style={{ colorScheme: "dark" }}
-            >
-              <Image
-                src="/logo.webp"
-                alt="RESCHO Logo"
-                width={36}
-                height={36}
-                className="object-contain"
-                unoptimized
-                priority
-              />
-            </div>
-            <span className="text-xl font-bold text-text-primary tracking-tight">
+          <Link href="/" className="flex items-center gap-3 mb-4 group">
+            <Image
+              src="/logo.webp"
+              alt="RESCHO Logo"
+              width={38}
+              height={38}
+              className="object-contain mix-blend-screen transition-transform duration-300 group-hover:scale-105"
+              priority
+            />
+            <span className="text-xl font-bold font-display text-text-primary tracking-tight group-hover:text-accent-primary transition-colors">
               RESCHO
             </span>
           </Link>
@@ -65,31 +59,31 @@ export default function SignUpPage() {
                 colorTextOnPrimaryBackground: "#ffffff",
                 colorNeutral: "#f0f0f5",
                 colorDanger: "#ff2d2d",
-                borderRadius: "0.875rem",
-                fontFamily: "Inter, system-ui, sans-serif",
+                borderRadius: "1rem",
+                fontFamily: "var(--font-sans), var(--font-display), sans-serif",
                 fontSize: "14px",
               },
               elements: {
                 rootBox: "w-full",
-                card: "bg-[#0e0e14] border border-white/[0.06] shadow-2xl rounded-2xl w-full",
-                headerTitle: "text-[#f0f0f5] font-bold",
+                card: "bg-[#0e0e14]/90 border border-white/[0.04] shadow-2xl rounded-3xl w-full backdrop-blur-xl",
+                headerTitle: "text-[#f0f0f5] font-bold font-display text-lg",
                 headerSubtitle: "text-[#8e8ea0]",
                 socialButtonsBlockButton:
-                  "border border-white/20 bg-[#1c1c28] text-[#f0f0f5] hover:bg-[#242433] hover:border-white/30 transition-colors",
-                socialButtonsBlockButtonText: "text-[#f0f0f5] font-semibold",
+                  "border border-white/[0.08] bg-[#16161f] text-[#f0f0f5] hover:bg-[#1c1c28] hover:border-white/20 transition-all duration-200 rounded-xl",
+                socialButtonsBlockButtonText: "text-[#f0f0f5] font-semibold font-display",
                 socialButtonsBlockButtonArrow: "text-[#f0f0f5]",
                 dividerLine: "bg-white/[0.06]",
-                dividerText: "text-[#4a4a5a]",
-                formFieldLabel: "text-[#8e8ea0] text-sm",
+                dividerText: "text-[#4a4a5a] text-xs uppercase tracking-wider",
+                formFieldLabel: "text-[#8e8ea0] text-xs font-medium",
                 formFieldInput:
-                  "bg-[#16161f] border-white/[0.08] text-[#f0f0f5] focus:border-[#ff3a5c]/50 focus:ring-0 rounded-xl",
+                  "bg-[#16161f] border-white/[0.06] text-[#f0f0f5] focus:border-[#ff3a5c]/50 focus:ring-0 rounded-xl",
                 formButtonPrimary:
-                  "bg-gradient-to-r from-[#ff3a5c] to-[#d4284a] hover:shadow-[0_8px_32px_rgba(255,58,92,0.3)] transition-all font-semibold rounded-xl",
+                  "bg-gradient-to-r from-[#ff3a5c] to-[#d4284a] hover:shadow-[0_8px_32px_rgba(255,58,92,0.3)] transition-all font-semibold font-display rounded-xl",
                 footerActionLink:
-                  "text-[#ff3a5c] hover:text-[#c0182e] font-medium",
+                  "text-[#ff3a5c] hover:text-[#d4284a] font-medium transition-colors",
                 identityPreviewText: "text-[#f0f0f5]",
                 identityPreviewEditButton: "text-[#ff3a5c]",
-                formFieldAction: "text-[#ff3a5c] hover:text-[#c0182e]",
+                formFieldAction: "text-[#ff3a5c] hover:text-[#d4284a]",
                 alertText: "text-[#f0f0f5]",
                 formResendCodeLink: "text-[#ff3a5c]",
               },

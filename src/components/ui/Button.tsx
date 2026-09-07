@@ -30,13 +30,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const baseStyles =
-      "font-semibold rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 tracking-tight";
+      "font-semibold font-display rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 tracking-tight";
 
     const variants = {
       primary:
         "bg-gradient-to-br from-accent-primary to-[#d4284a] text-white hover:shadow-[0_8px_32px_rgba(255,58,92,0.3)] hover:-translate-y-0.5 disabled:opacity-40 disabled:hover:shadow-none disabled:hover:translate-y-0",
       secondary:
-        "border-[1.5px] border-accent-secondary text-accent-secondary hover:bg-accent-secondary hover:text-white hover:shadow-[0_8px_32px_rgba(192,24,46,0.3)] disabled:opacity-40",
+        "border border-accent-secondary/60 text-accent-secondary hover:bg-accent-secondary hover:text-white hover:shadow-[0_8px_32px_rgba(192,24,46,0.3)] disabled:opacity-40",
       ghost:
         "text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/60 disabled:opacity-40",
     };

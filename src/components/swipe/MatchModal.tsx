@@ -93,7 +93,7 @@ export default function MatchModal({
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div
-              className="bg-bg-secondary rounded-3xl max-w-sm w-full overflow-hidden"
+              className="bg-bg-secondary/95 backdrop-blur-2xl rounded-3xl max-w-sm w-full overflow-hidden border border-white/[0.08] shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Restaurant Image — Gradient + Emoji */}
@@ -120,10 +120,10 @@ export default function MatchModal({
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", delay: 0.2 }}
-                  className="inline-flex items-center gap-2 bg-accent-primary text-bg-primary px-6 py-2 rounded-full font-bold text-lg mb-4"
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-accent-primary to-[#d4284a] text-white px-6 py-2 rounded-full font-bold font-display text-sm mb-4 shadow-lg shadow-accent-primary/40"
                 >
                   <Heart
-                    className="w-6 h-6"
+                    className="w-5 h-5"
                     fill="currentColor"
                     strokeWidth={0}
                   />
@@ -135,7 +135,7 @@ export default function MatchModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-2xl font-bold text-text-primary mb-2"
+                  className="text-2xl font-bold font-display text-text-primary mb-2"
                 >
                   {restaurant.name}
                 </motion.h2>

@@ -94,7 +94,7 @@ export default function SwipeStack({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.45 }}
         >
-          <h3 className="text-2xl font-bold text-text-primary mb-2">
+          <h3 className="text-2xl font-bold font-display text-text-primary mb-2">
             {hasMatches ? "You're done swiping!" : "All done!"}
           </h3>
           <p className="text-text-secondary text-sm max-w-xs mx-auto leading-relaxed">
@@ -110,14 +110,14 @@ export default function SwipeStack({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.35, type: "spring", stiffness: 220 }}
-            className="mt-5 flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent-primary/10 border border-accent-primary/25"
+            className="mt-5 flex items-center gap-2 px-5 py-2.5 rounded-full bg-accent-primary/10 border border-accent-primary/20"
           >
             <Heart
               className="w-4 h-4 text-accent-primary"
               fill="currentColor"
               strokeWidth={0}
             />
-            <span className="text-accent-primary font-semibold text-sm">
+            <span className="text-accent-primary font-bold font-display text-sm">
               {matchCount} {matchCount === 1 ? "Match" : "Matches"} Found
             </span>
           </motion.div>
@@ -136,7 +136,7 @@ export default function SwipeStack({
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-br from-accent-primary to-[#d4284a] text-white font-semibold text-sm shadow-[0_8px_32px_rgba(255,58,92,0.35)] hover:shadow-[0_12px_40px_rgba(255,58,92,0.45)] transition-shadow duration-300"
+              className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-br from-accent-primary to-[#d4284a] text-white font-semibold font-display text-sm shadow-[0_8px_32px_rgba(255,58,92,0.35)] hover:shadow-[0_12px_40px_rgba(255,58,92,0.45)] transition-shadow duration-300"
             >
               <Plus className="w-4 h-4" />
               Create New Room
@@ -149,7 +149,7 @@ export default function SwipeStack({
               whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.97 }}
               transition={{ type: "spring", stiffness: 400, damping: 20 }}
-              className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl border border-bg-tertiary text-text-secondary hover:text-text-primary hover:border-accent-primary/30 font-medium text-sm transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl border border-white/[0.06] text-text-secondary hover:text-text-primary hover:border-accent-primary/30 font-semibold font-display text-sm transition-all duration-200"
             >
               <Home className="w-4 h-4" />
               Go to Home

@@ -40,8 +40,8 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: var(--font-outfit), 'Outfit', system-ui, sans-serif;
 }
 
 * {
@@ -56,15 +56,25 @@ html {
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family:
-    var(--font-sans),
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-sans), var(--font-display), system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.55;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display,
+.text-display,
+.text-headline,
+.text-title {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.025em;
 }
 
 /* ── Premium Glow Effects ── */
@@ -315,10 +325,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  box-shadow:
-    0 0 0 2px rgba(255, 58, 92, 0.2),
-    0 0 16px rgba(255, 58, 92, 0.08);
-  transition: box-shadow 200ms ease;
+  box-shadow: none;
+  transition: none;
 }
 
 /* ─── Badge pop animation ────────────────────────────────────── */

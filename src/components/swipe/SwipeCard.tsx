@@ -71,7 +71,7 @@ export default function SwipeCard({
       }}
     >
       <div
-        className="relative w-full h-full rounded-2xl overflow-hidden border border-bg-tertiary shadow-2xl"
+        className="relative w-full h-full rounded-3xl overflow-hidden border border-white/[0.08] shadow-2xl"
         style={{ backgroundColor: "#1a1a1a" }}
       >
         {/* Restaurant Background — Gradient + Icon */}
@@ -89,12 +89,12 @@ export default function SwipeCard({
             <span style={{ fontSize: "180px", lineHeight: 1 }}>{emoji}</span>
           </div>
           {/* Foursquare category icon */}
-          <div className="absolute top-6 right-6 w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10">
+          <div className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
             <Image
               src={restaurant.image}
               alt={restaurant.cuisine}
-              width={48}
-              height={48}
+              width={42}
+              height={42}
               className="object-contain"
               unoptimized
             />
@@ -105,13 +105,13 @@ export default function SwipeCard({
 
         {/* Like/Dislike Indicators */}
         <motion.div
-          className="absolute top-8 right-8 px-4 py-2 bg-accent-primary text-bg-primary font-bold text-2xl rounded-xl border-4 border-accent-primary rotate-12 z-10"
+          className="absolute top-8 right-8 px-4 py-2 bg-accent-primary text-white font-bold font-display text-2xl rounded-2xl shadow-xl rotate-12 z-10"
           style={{ opacity: likeOpacity }}
         >
           LIKE
         </motion.div>
         <motion.div
-          className="absolute top-8 left-8 px-4 py-2 bg-accent-error text-white font-bold text-2xl rounded-xl border-4 border-accent-error -rotate-12 z-10"
+          className="absolute top-8 left-8 px-4 py-2 bg-accent-error text-white font-bold font-display text-2xl rounded-2xl shadow-xl -rotate-12 z-10"
           style={{ opacity: dislikeOpacity }}
         >
           NOPE
@@ -130,7 +130,7 @@ export default function SwipeCard({
             {restaurant.priceLevel && (
               <>
                 <span className="text-text-muted">•</span>
-                <span className="text-accent-primary text-sm font-medium">
+                <span className="text-accent-primary text-sm font-medium font-display">
                   {restaurant.priceLevel}
                 </span>
               </>
@@ -138,7 +138,7 @@ export default function SwipeCard({
           </div>
 
           {/* Restaurant Name */}
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold font-display text-white mb-2">
             {restaurant.name}
           </h2>
 
