@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.39.0",
+    "@clerk/themes": "^2.4.57",
     "@use-gesture/react": "^10.3.1",
     "axios": "^1.13.6",
     "framer-motion": "^12.34.3",

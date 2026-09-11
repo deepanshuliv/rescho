@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import './globals.css';
 
 const outfit = Outfit({
@@ -35,7 +36,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorPrimary: '#ff3a5c',
+          colorBackground: '#0e0e14',
+          colorInputBackground: '#16161f',
+          colorInputText: '#f0f0f5',
+          colorText: '#f0f0f5',
+          colorTextSecondary: '#8e8ea0',
+        },
+        elements: {
+          card: 'border border-white/5 shadow-2xl',
+          userButtonPopoverCard: 'border border-white/5 shadow-2xl',
+        }
+      }}
+    >
       <html lang="en" className="dark" suppressHydrationWarning>
         <body
           suppressHydrationWarning

@@ -287,38 +287,55 @@ export default function Hero() {
             </div>
 
             {/* Floating decorative elements */}
+            {/* 1. Top Left - Pizza */}
             <motion.div
-              animate={{ y: [-8, 8, -8], rotate: [0, 10, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -top-4 -left-4 w-12 h-12 rounded-xl bg-gradient-to-br from-accent-primary to-accent-secondary shadow-lg shadow-accent-primary/20 flex items-center justify-center text-lg"
+              animate={{ y: [-8, 8, -8], rotate: [-5, 5, -5] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-6 -left-6 w-16 h-16 rounded-2xl glass-light shadow-[0_8px_32px_rgba(255,58,92,0.2)] flex items-center justify-center text-3xl z-20"
             >
-              🍕
+              <span className="drop-shadow-md">🍕</span>
             </motion.div>
 
+            {/* 2. Center Right - Taco */}
             <motion.div
-              animate={{ y: [6, -6, 6], rotate: [0, -15, 0] }}
+              animate={{ y: [6, -6, 6], rotate: [10, -5, 10] }}
               transition={{
-                duration: 5,
+                duration: 4.5,
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 1,
               }}
-              className="absolute -bottom-3 -right-3 w-11 h-11 rounded-full bg-gradient-to-br from-accent-secondary to-accent-tertiary shadow-lg shadow-accent-secondary/20 flex items-center justify-center text-base"
+              className="absolute top-[40%] -right-8 w-14 h-14 rounded-full glass shadow-[0_8px_24px_rgba(255,58,92,0.15)] flex items-center justify-center text-2xl z-20"
             >
-              🍣
+              <span className="drop-shadow-md">🌮</span>
             </motion.div>
 
+            {/* 3. Bottom Right - Sushi */}
             <motion.div
-              animate={{ y: [-5, 5, -5], x: [-3, 3, -3] }}
+              animate={{ y: [-5, 5, -5], rotate: [0, 15, 0] }}
               transition={{
                 duration: 6,
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.5,
               }}
-              className="absolute top-1/2 -right-6 w-10 h-10 rounded-lg bg-gradient-to-br from-accent-tertiary to-accent-primary shadow-lg shadow-accent-tertiary/20 flex items-center justify-center text-sm rotate-12"
+              className="absolute -bottom-4 right-12 w-12 h-12 rounded-xl glass-light shadow-[0_8px_32px_rgba(255,58,92,0.25)] flex items-center justify-center text-xl z-20"
             >
-              🌮
+              <span className="drop-shadow-md">🍣</span>
+            </motion.div>
+
+            {/* 4. Bottom Left - Burger */}
+            <motion.div
+              animate={{ y: [8, -8, 8], rotate: [-10, 0, -10] }}
+              transition={{
+                duration: 5.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1.5,
+              }}
+              className="absolute bottom-8 -left-8 w-14 h-14 rounded-full glass shadow-[0_8px_24px_rgba(255,58,92,0.15)] flex items-center justify-center text-2xl z-20"
+            >
+              <span className="drop-shadow-md">🍔</span>
             </motion.div>
           </motion.div>
         </div>
