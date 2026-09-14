@@ -193,15 +193,15 @@ export default function Features() {
             </p>
           </motion.div>
 
-          {/* Bento feature cards */}
-          <div className="grid md:grid-cols-3 gap-5">
+          {/* Bento feature cards (Staggered layout to avoid identical cards in a row) */}
+          <div className="grid md:grid-cols-3 gap-5 items-start">
             {/* Step 1 */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-primary/20 transition-all duration-500"
+              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-primary/20 transition-all duration-500 mt-0"
             >
               {/* Step number */}
               <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-primary/10 flex items-center justify-center">
@@ -227,7 +227,7 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-secondary/20 transition-all duration-500"
+              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-secondary/20 transition-all duration-500 md:mt-12"
             >
               <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-secondary/10 flex items-center justify-center">
                 <span className="text-accent-secondary font-bold text-lg">
@@ -252,7 +252,7 @@ export default function Features() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-tertiary/20 transition-all duration-500"
+              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-tertiary/20 transition-all duration-500 md:mt-24"
             >
               <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-tertiary/10 flex items-center justify-center">
                 <span className="text-accent-tertiary font-bold text-lg">

@@ -148,35 +148,6 @@ export function recordSwipe(
   return { success: true, isMatch: false };
 }
 
-export function getRoomMatches(roomId: string): string[] {
-  return rooms.get(roomId)?.matches || [];
-}
-
-/**
- * Permanently deletes a room and releases its code.
- */
-export function deleteRoom(roomId: string): boolean {
-  const room = rooms.get(roomId);
-  if (!room) return false;
-
-  codeToRoomId.delete(room.code);
-  rooms.delete(roomId);
-  return true;
-}
-
-/**
- * Periodically removes inactive rooms to prevent memory leaks.
- */
-export function cleanupOldRooms(): void {
-  const now = Date.now();
-
-  for (const [roomId, room] of rooms.entries()) {
-    if (now - room.createdAt > TWO_HOURS_MS) {
-      deleteRoom(roomId);
-    }
-  }
-}
-
 /**
  * Returns all active rooms (for debugging/admin purposes).
  */
