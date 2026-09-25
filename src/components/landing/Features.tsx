@@ -2,488 +2,354 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
+import Button from "../ui/Button";
 import {
   Star,
   MapPin,
   Heart,
-  Users,
-  ArrowUpDown,
   X,
   Zap,
   Crosshair,
   HeartHandshake,
+  ArrowRight,
 } from "lucide-react";
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
+const reveal = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.7, delay, ease },
+});
+
+const STEPS = [
+  {
+    title: "Create & invite",
+    body: "One person sets the location and creates a room. Share the six-character code with your partner so they can join instantly. No complicated sign-ups.",
+  },
+  {
+    title: "Swipe together",
+    body: "You both swipe through the same list of local spots. Right if you love it, left if you don't. Your choices stay hidden from each other.",
+  },
+  {
+    title: "Match & dine",
+    body: "When you both swipe right on the same restaurant, it's a match. All that's left is booking the table.",
+  },
+];
+
+const HIGHLIGHTS = [
+  { icon: Zap, title: "Real-time", body: "Swipes sync instantly" },
+  { icon: Crosshair, title: "Accurate", body: "GPS-based results" },
+  { icon: HeartHandshake, title: "Fun", body: "Deciding feels like a game" },
+];
+
 export default function Features() {
+  const { isSignedIn } = useAuth();
+  const createRoomHref = isSignedIn
+    ? "/location?mode=create"
+    : "/sign-in?redirect_url=%2Flocation%3Fmode%3Dcreate";
+
   return (
     <>
-      {/* Bento Grid — Discover Section */}
-      <section id="discover" className="section-padding">
-        <div className="max-w-7xl mx-auto">
+      {/* Discover: bento grid */}
+      <section id="discover" className="section-padding scroll-mt-24">
+        <div className="mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
+            {...reveal()}
+            className="mb-12 grid gap-4 md:mb-16 md:grid-cols-2 md:items-end md:gap-12"
           >
-            <span className="text-accent-secondary text-caption font-semibold tracking-[0.2em] uppercase">
-              Discover
-            </span>
-            <h2 className="text-headline mt-2 mb-3">
-              Explore <span className="gradient-text-primary">Cuisines</span>{" "}
-              You Love
-            </h2>
-            <p className="text-text-secondary text-body-lg max-w-md leading-relaxed">
+            <div>
+              <p className="mb-3 text-sm font-medium text-text-muted">Discover</p>
+              <h2 className="text-headline">
+                Explore <span className="text-text-secondary">cuisines</span> you
+                love
+              </h2>
+            </div>
+            <p className="text-body-lg max-w-[42ch] text-text-secondary md:justify-self-end">
               Create a room, invite your partner, and swipe through the best
               restaurants near you together.
             </p>
           </motion.div>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 grid-rows-[auto] gap-5 md:gap-6">
-            {/* Large featured card — spans 2 cols, 2 rows */}
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-5">
+            {/* Featured */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="col-span-2 row-span-2 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-bg-secondary min-h-[300px] md:min-h-[380px]"
+              {...reveal()}
+              className="tile-shine group relative col-span-2 row-span-2 min-h-[320px] overflow-hidden rounded-[1.75rem] bg-bg-secondary ring-1 ring-white/[0.06] md:min-h-[420px]"
             >
               <Image
                 src="/food-sushi.webp"
-                alt="Premium Sushi"
+                alt="Nigiri sushi on a slate board"
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                <div className="inline-flex items-center gap-2 bg-accent-primary/20 backdrop-blur-sm px-3 py-1.5 rounded-full mb-3">
-                  <span className="text-sm">🍣</span>
-                  <span className="text-accent-primary text-xs font-semibold tracking-wider">
-                    PREMIUM PICK
-                  </span>
-                </div>
-                <h3 className="text-title text-white mb-2">Japanese Cuisine</h3>
-                <p className="text-white/60 text-body">
-                  Discover the finest sushi, ramen, and izakaya spots in your
-                  area
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+                <h3 className="text-title mb-2 text-white">Japanese cuisine</h3>
+                <p className="text-body max-w-[40ch] text-white/65">
+                  The finest sushi, ramen, and izakaya spots in your area.
                 </p>
-                <div className="flex items-center gap-1 mt-3">
+                <div className="mt-4 flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Star
                       key={i}
-                      className="w-4 h-4 text-accent-primary"
+                      className="h-3.5 w-3.5 text-accent-primary"
                       fill="currentColor"
                       strokeWidth={0}
                     />
                   ))}
-                  <span className="text-white/50 text-caption ml-2">
-                    4.9 Rating
-                  </span>
+                  <span className="tabular ml-2 text-xs text-white/55">4.9 rating</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Stat card — top right */}
+            {/* Stat */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-gradient-to-br from-accent-primary/[0.08] to-bg-secondary p-5 flex flex-col justify-between min-h-[170px]"
+              {...reveal(0.08)}
+              className="surface-glow relative col-span-1 flex min-h-[180px] flex-col justify-between rounded-[1.5rem] p-5"
             >
-              <div className="w-11 h-11 rounded-xl bg-accent-primary/15 flex items-center justify-center mb-4">
-                <MapPin className="w-5 h-5 text-accent-primary" />
-              </div>
+              <span className="flex h-10 w-10 items-center justify-center icon-tile">
+                <MapPin className="h-5 w-5 text-accent-primary" />
+              </span>
               <div>
-                <p className="text-headline text-accent-primary">500+</p>
-                <p className="text-text-secondary text-caption mt-1">
-                  Restaurants Nearby
+                <p className="tabular font-display text-4xl font-bold tracking-tight text-text-primary">
+                  500+
                 </p>
+                <p className="mt-1 text-xs text-text-secondary">Restaurants nearby</p>
               </div>
             </motion.div>
 
-            {/* Pasta card — mid right */}
+            {/* Pasta */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-bg-secondary min-h-[170px]"
+              {...reveal(0.14)}
+              className="tile-shine group relative col-span-1 min-h-[180px] overflow-hidden rounded-[1.5rem] bg-bg-secondary ring-1 ring-white/[0.06]"
             >
               <Image
                 src="/food-pasta.webp"
-                alt="Italian pasta"
+                alt="Fresh Italian pasta"
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(min-width: 768px) 25vw, 50vw"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="text-white font-semibold text-base">Italian</p>
-                <p className="text-white/50 text-xs mt-1">42 spots nearby</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                <p className="font-display text-base font-semibold text-white">Italian</p>
+                <p className="tabular mt-0.5 text-xs text-white/55">42 spots nearby</p>
               </div>
             </motion.div>
 
-            {/* Burger card */}
+            {/* Burger */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-bg-secondary min-h-[170px]"
+              {...reveal(0.2)}
+              className="tile-shine group relative col-span-1 min-h-[180px] overflow-hidden rounded-[1.5rem] bg-bg-secondary ring-1 ring-white/[0.06]"
             >
               <Image
                 src="/food-burger.webp"
-                alt="Gourmet burger"
+                alt="Gourmet burger with fries"
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(min-width: 768px) 25vw, 50vw"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.05]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <p className="text-white font-semibold text-base">Burgers</p>
-                <p className="text-white/50 text-xs mt-1">38 spots nearby</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-5">
+                <p className="font-display text-base font-semibold text-white">Burgers</p>
+                <p className="tabular mt-0.5 text-xs text-white/55">38 spots nearby</p>
               </div>
             </motion.div>
 
-            {/* Match percentage card */}
+            {/* Match rate */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="col-span-1 group relative rounded-2xl overflow-hidden border border-white/[0.04] bg-gradient-to-br from-accent-primary/[0.08] to-bg-secondary p-5 flex flex-col justify-between min-h-[170px]"
+              {...reveal(0.26)}
+              className="surface-glow relative col-span-1 flex min-h-[180px] flex-col justify-between rounded-[1.5rem] p-5"
             >
-              <div className="w-11 h-11 rounded-xl bg-accent-primary/15 flex items-center justify-center mb-4">
+              <span className="flex h-10 w-10 items-center justify-center icon-tile">
                 <Heart
-                  className="w-5 h-5 text-accent-primary"
+                  className="h-5 w-5 text-accent-primary"
                   fill="currentColor"
                   strokeWidth={0}
                 />
-              </div>
+              </span>
               <div>
-                <p className="text-headline text-accent-primary">92%</p>
-                <p className="text-text-secondary text-caption mt-1">
-                  Match Success Rate
+                <p className="tabular font-display text-4xl font-bold tracking-tight text-text-primary">
+                  92%
                 </p>
+                <p className="mt-1 text-xs text-text-secondary">Match success rate</p>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Features — How It Works */}
-      <section id="features" className="section-padding relative">
-        <div className="max-w-7xl mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-14"
-          >
-            <span className="text-accent-tertiary text-caption font-semibold tracking-[0.2em] uppercase">
-              How It Works
-            </span>
-            <h2 className="text-headline mt-2 mb-3">
-              Three Steps to Your{" "}
-              <span className="gradient-text-vivid">Perfect Meal</span>
+      {/* Features: how it works, as a numbered list */}
+      <section id="features" className="section-padding scroll-mt-24">
+        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-24">
+          <motion.div {...reveal()} className="lg:sticky lg:top-24 lg:self-start">
+            <p className="mb-3 text-sm font-medium text-text-muted">How it works</p>
+            <h2 className="text-headline mb-5">
+              Three steps to your{" "}
+              <span className="text-text-secondary">perfect meal</span>
             </h2>
-            <p className="text-text-secondary text-body-lg max-w-md mx-auto leading-relaxed">
-              No more endless debates about where to eat. Create a room, invite your partner, and let the swiping decide your next date night destination!
+            <p className="text-body-lg max-w-[44ch] text-text-secondary">
+              No more endless debates about where to eat. Create a room, invite
+              your partner, and let the swiping decide your next date night.
             </p>
           </motion.div>
 
-          {/* Bento feature cards (Staggered layout to avoid identical cards in a row) */}
-          <div className="grid md:grid-cols-3 gap-5 items-start">
-            {/* Step 1 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-primary/20 transition-all duration-500 mt-0"
-            >
-              {/* Step number */}
-              <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-primary/10 flex items-center justify-center">
-                <span className="text-accent-primary font-bold text-lg">1</span>
-              </div>
-              {/* Icon */}
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-primary/15 to-accent-primary/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                <Users className="w-6 h-6 text-accent-primary" />
-              </div>
-              <h3 className="text-title text-white mb-2">
-                Create &amp; Invite
-              </h3>
-              <p className="text-white/60 text-body leading-relaxed">
-                One person sets the location and creates a room. Share the unique code with your partner so they can join instantly—no complicated sign-ups.
-              </p>
-              {/* Decorative line */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </motion.div>
-
-            {/* Step 2 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-secondary/20 transition-all duration-500 md:mt-12"
-            >
-              <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-secondary/10 flex items-center justify-center">
-                <span className="text-accent-secondary font-bold text-lg">
-                  2
+          <ol className="relative">
+            {STEPS.map((step, i) => (
+              <motion.li
+                key={step.title}
+                {...reveal(i * 0.08)}
+                className="group grid grid-cols-[3.5rem_1fr] gap-5 rounded-3xl border border-transparent p-5 transition-[background-color,border-color,box-shadow] duration-300 hover:border-white/[0.06] hover:bg-white/[0.025] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] md:grid-cols-[5rem_1fr] md:gap-8 md:p-7"
+              >
+                <span
+                  className="tabular bg-gradient-to-b from-white/25 to-white/[0.04] bg-clip-text font-display text-4xl font-bold leading-none tracking-tight text-transparent transition-all duration-300 group-hover:from-white/70 group-hover:to-white/15 md:text-5xl"
+                  aria-hidden
+                >
+                  {String(i + 1).padStart(2, "0")}
                 </span>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-secondary/15 to-accent-secondary/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                <ArrowUpDown className="w-6 h-6 text-accent-secondary" />
-              </div>
-              <h3 className="text-title text-white mb-2">
-                Swipe Together
-              </h3>
-              <p className="text-white/60 text-body leading-relaxed">
-                Both of you swipe through a curated list of local spots. Swipe right if you love it, left if you don&apos;t. We keep your choices hidden!
-              </p>
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent-secondary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </motion.div>
-
-            {/* Step 3 */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="group relative rounded-[16px] overflow-hidden border border-white/[0.04] bg-bg-secondary/60 backdrop-blur-sm p-7 hover:bg-bg-secondary hover:border-accent-tertiary/20 transition-all duration-500 md:mt-24"
-            >
-              <div className="absolute top-6 right-6 w-10 h-10 rounded-full bg-accent-tertiary/10 flex items-center justify-center">
-                <span className="text-accent-tertiary font-bold text-lg">
-                  3
-                </span>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-tertiary/15 to-accent-tertiary/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                <Heart
-                  className="w-6 h-6 text-accent-tertiary"
-                  fill="currentColor"
-                  strokeWidth={0}
-                />
-              </div>
-              <h3 className="text-title text-white mb-2">
-                Match & Dine!
-              </h3>
-              <p className="text-white/60 text-body leading-relaxed">
-                When you and your partner both swipe right on the same
-                restaurant — it&apos;s a match! Time to book a table and eat! 🎉
-              </p>
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent-tertiary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            </motion.div>
-          </div>
+                <div>
+                  <h3 className="text-title mb-2 text-text-primary">{step.title}</h3>
+                  <p className="text-body max-w-[52ch] text-text-secondary">{step.body}</p>
+                </div>
+              </motion.li>
+            ))}
+          </ol>
         </div>
       </section>
 
-      {/* How It Works — Visual Steps */}
-      <section id="how-it-works" className="section-padding">
-        <div className="max-w-7xl mx-auto">
+      {/* CTA with phone preview */}
+      <section id="how-it-works" className="section-padding scroll-mt-24">
+        <div className="mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="relative rounded-3xl overflow-hidden border border-white/[0.06] bg-bg-secondary/40 backdrop-blur-xl p-8 md:p-12 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+            {...reveal()}
+            className="surface-glow relative overflow-hidden rounded-[2rem] p-8 md:p-14"
           >
-            {/* Background decoration - heavily reduced to avoid muddiness */}
-            <div className="absolute top-0 right-1/4 w-96 h-96 bg-accent-primary/[0.02] rounded-full blur-[120px]" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-accent-secondary/[0.02] rounded-full blur-[100px]" />
+            <div
+              className="pointer-events-none absolute -right-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-accent-primary/[0.05] blur-[120px]"
+              aria-hidden
+            />
 
-            <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+            <div className="relative grid items-center gap-14 md:grid-cols-2">
               <div>
-                <span className="text-accent-primary text-caption font-semibold tracking-[0.2em] uppercase">
-                  Ready to Choose?
-                </span>
-                <h2 className="text-headline mt-2 mb-3 text-text-primary">
-                  Stop debating.{" "}
-                  <span className="gradient-text-primary">Start swiping.</span>
-                </h2>
-                <p className="text-text-secondary text-body-lg mb-8 leading-relaxed">
-                  Connect with your partner in real-time. You both swipe through
-                  the same restaurants independently, and let our algorithm find your
-                  perfect match. It&apos;s that simple.
+                <p className="mb-3 text-sm font-medium text-text-muted">
+                  Ready to choose?
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  {/* Real-time */}
-                  <div className="flex-1 min-w-[160px] flex items-center gap-3 glass hover:glass-light transition-all duration-300 rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_32px_rgba(255,58,92,0.1)] group cursor-default">
-                    <div className="w-10 h-10 rounded-xl bg-accent-primary/10 group-hover:bg-accent-primary/20 flex items-center justify-center transition-colors duration-300 shrink-0">
-                      <Zap
-                        className="w-5 h-5 text-accent-primary"
-                        fill="currentColor"
-                        strokeWidth={0}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-text-primary text-sm font-semibold mb-0.5">
-                        Real-time
-                      </p>
-                      <p className="text-text-muted text-xs">Instant sync</p>
-                    </div>
-                  </div>
-                  {/* Accurate */}
-                  <div className="flex-1 min-w-[160px] flex items-center gap-3 glass hover:glass-light transition-all duration-300 rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_32px_rgba(192,24,46,0.1)] group cursor-default">
-                    <div className="w-10 h-10 rounded-xl bg-accent-secondary/10 group-hover:bg-accent-secondary/20 flex items-center justify-center transition-colors duration-300 shrink-0">
-                      <Crosshair className="w-5 h-5 text-accent-secondary" />
-                    </div>
-                    <div>
-                      <p className="text-text-primary text-sm font-semibold mb-0.5">
-                        Accurate
-                      </p>
-                      <p className="text-text-muted text-xs">GPS based</p>
-                    </div>
-                  </div>
-                  {/* Fun */}
-                  <div className="flex-1 min-w-[160px] flex items-center gap-3 glass hover:glass-light transition-all duration-300 rounded-2xl px-5 py-4 border border-white/5 hover:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_32px_rgba(122,15,30,0.15)] group cursor-default">
-                    <div className="w-10 h-10 rounded-xl bg-accent-tertiary/10 group-hover:bg-accent-tertiary/20 flex items-center justify-center transition-colors duration-300 shrink-0">
-                      <HeartHandshake className="w-5 h-5 text-accent-tertiary" />
-                    </div>
-                    <div>
-                      <p className="text-text-primary text-sm font-semibold mb-0.5">
-                        Fun
-                      </p>
-                      <p className="text-text-muted text-xs">Gamified UX</p>
-                    </div>
-                  </div>
+                <h2 className="text-headline mb-5 text-text-primary">
+                  Stop debating.{" "}
+                  <span className="text-text-secondary">Start swiping.</span>
+                </h2>
+                <p className="text-body-lg mb-10 max-w-[46ch] text-text-secondary">
+                  Connect with your partner in real time. You both swipe through
+                  the same restaurants independently, and we surface the places
+                  you both said yes to.
+                </p>
+
+                <ul className="mb-10 grid gap-5 sm:grid-cols-3">
+                  {HIGHLIGHTS.map(({ icon: Icon, title, body }) => (
+                    <li key={title} className="flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center icon-tile">
+                        <Icon className="h-5 w-5 text-accent-primary" />
+                      </span>
+                      <div>
+                        <p className="font-display text-sm font-semibold text-text-primary">
+                          {title}
+                        </p>
+                        <p className="text-xs text-text-muted">{body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
+                  <Button href={createRoomHref} size="lg" className="group">
+                    Create a room
+                    <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </Button>
+                  <Link
+                    href="/room/join"
+                    className="text-sm font-semibold text-text-secondary hover:text-text-primary"
+                  >
+                    Join with a code
+                  </Link>
                 </div>
               </div>
 
-              <div className="flex justify-center mt-8 md:mt-0">
-                {/* Phone mockup with swipe preview */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="relative"
-                >
-                  {/* Phone Bezel */}
-                  <div className="w-[280px] h-[520px] bg-black rounded-[3.5rem] p-3 shadow-[0_32px_64px_rgba(0,0,0,0.6)] relative z-10 ring-1 ring-white/10 border-[3px] border-[#2a2a2a]">
-                    
-                    {/* Hardware Buttons */}
-                    <div className="absolute top-24 -left-[4px] w-1 h-8 bg-[#333] rounded-l-md" />
-                    <div className="absolute top-36 -left-[4px] w-1 h-14 bg-[#333] rounded-l-md" />
-                    <div className="absolute top-52 -left-[4px] w-1 h-14 bg-[#333] rounded-l-md" />
-                    <div className="absolute top-40 -right-[4px] w-1 h-20 bg-[#333] rounded-r-md" />
+              {/* Phone preview (decorative) */}
+              <div className="flex justify-center" aria-hidden>
+                <div className="relative">
+                  <div className="halo" />
+                  <div className="relative h-[520px] w-[272px] rounded-[3.25rem] border-[3px] border-[#26262e] bg-[#08080c] p-3 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/10">
+                    <div className="relative h-full w-full overflow-hidden rounded-[2.6rem] bg-bg-secondary">
+                      <div className="absolute left-1/2 top-2.5 z-30 h-7 w-[88px] -translate-x-1/2 rounded-full bg-[#08080c]" />
 
-                    {/* Phone Screen */}
-                    <div className="w-full h-full rounded-[2.75rem] overflow-hidden bg-bg-secondary relative">
-                      
-                      {/* Dynamic Island */}
-                      <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-[90px] h-7 bg-black rounded-full z-30 flex items-center justify-between px-2.5">
-                        <div className="w-2 h-2 rounded-full bg-white/10" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-white/10 relative">
-                          <div className="absolute inset-0 m-auto w-1 h-1 bg-[#1a1a1a] rounded-full" />
-                        </div>
-                      </div>
-
-                      {/* Phone screen content */}
-                      <div className="absolute inset-0 flex flex-col pt-1">
-                        {/* Status bar */}
-                        <div className="flex items-center justify-between px-7 pt-3 pb-2 z-20 relative">
-                          <span className="text-[11px] text-white font-semibold">
-                            9:41
-                          </span>
-                          <div className="flex items-center gap-1.5 opacity-90">
-                            {/* Simplified battery icon */}
-                            <div className="w-[18px] h-[10px] border border-white/50 rounded-[3px] p-[1px] flex justify-end">
-                              <div className="w-[12px] h-full bg-white rounded-[1.5px]" />
-                            </div>
+                      <div className="absolute inset-0 flex flex-col">
+                        <div className="flex items-center justify-between px-7 pb-2 pt-4">
+                          <span className="tabular text-[11px] font-semibold text-white">9:41</span>
+                          <div className="flex h-[10px] w-[18px] justify-end rounded-[3px] border border-white/50 p-[1px]">
+                            <div className="h-full w-[12px] rounded-[1.5px] bg-white" />
                           </div>
                         </div>
 
-                        {/* App Header */}
-                        <div className="flex items-center justify-between px-5 pt-3 pb-3">
-                          <span className="text-[11px] text-text-muted font-medium">
-                            Room: A7X2
+                        <div className="flex items-center justify-between px-5 py-3">
+                          <span className="font-mono text-[11px] font-semibold tracking-[0.15em] text-accent-primary">
+                            A7X2K9
                           </span>
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-1.5 h-1.5 rounded-full bg-accent-tertiary shadow-[0_0_8px_rgba(122,15,30,0.6)] animate-pulse" />
-                            <span className="text-[11px] text-text-muted font-medium">
-                              Connected
-                            </span>
-                          </div>
+                          <span className="text-[11px] text-text-muted">Partner joined</span>
                         </div>
 
-                        {/* Card stack */}
-                        <div className="flex-1 px-4 pb-4 relative">
-                          {/* Back card */}
-                          <div className="absolute inset-x-6 top-3 bottom-6 rounded-2xl bg-bg-tertiary opacity-40 transform rotate-3 border border-white/5" />
-                          {/* Front card */}
+                        <div className="relative flex-1 px-4 pb-4">
+                          <div className="absolute inset-x-6 bottom-6 top-3 rotate-3 rounded-2xl border border-white/5 bg-bg-tertiary opacity-50" />
                           <motion.div
                             animate={{ rotate: [-1.5, 1.5, -1.5] }}
-                            transition={{
-                              duration: 4,
-                              repeat: Infinity,
-                              ease: "easeInOut",
-                            }}
-                            className="absolute inset-x-4 top-0 bottom-4 rounded-2xl overflow-hidden border border-white/10 shadow-xl"
+                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                            className="absolute inset-x-4 bottom-4 top-0 overflow-hidden rounded-2xl border border-white/10 shadow-xl"
                           >
                             <Image
                               src="/food-pasta.webp"
-                              alt="Restaurant preview"
+                              alt=""
                               fill
+                              sizes="240px"
                               className="object-cover"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/95 via-bg-primary/30 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/95 via-bg-primary/25 to-transparent" />
                             <div className="absolute bottom-5 left-4 right-4">
-                              <div className="inline-flex items-center gap-1 glass-light border border-white/10 px-2.5 py-1 rounded-full mb-2 shadow-md">
-                                <span className="text-white text-[10px] font-semibold tracking-wide">
-                                  Italian
-                                </span>
-                              </div>
-                              <p className="text-white font-display font-bold text-xl mb-1 drop-shadow-md">
+                              <p className="mb-1 text-[10px] font-semibold text-white/70">Italian</p>
+                              <p className="mb-1 font-display text-xl font-bold text-white">
                                 Trattoria Bella
                               </p>
-                              <p className="text-white/80 text-[11px] font-medium">
-                                0.9km • $$$ • 9.0★
+                              <p className="tabular text-[11px] font-medium text-white/70">
+                                0.9 km, $$$, 4.6
                               </p>
                             </div>
                           </motion.div>
                         </div>
-                        
-                        {/* Action buttons */}
+
                         <div className="flex justify-center gap-8 pb-8">
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="w-14 h-14 rounded-full glass border border-white/10 shadow-lg flex items-center justify-center cursor-pointer group"
-                          >
-                            <X
-                              className="w-6 h-6 text-text-muted group-hover:text-accent-error transition-colors"
-                              strokeWidth={2.5}
-                            />
-                          </motion.div>
-                          <motion.div
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="w-14 h-14 rounded-full glass border border-white/10 shadow-lg flex items-center justify-center cursor-pointer group"
-                          >
-                            <Heart
-                              className="w-6 h-6 text-accent-primary"
-                              fill="currentColor"
-                              strokeWidth={0}
-                            />
-                          </motion.div>
+                          <div className="glass flex h-14 w-14 items-center justify-center rounded-full">
+                            <X className="h-6 w-6 text-text-muted" strokeWidth={2.5} />
+                          </div>
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-gradient shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_-6px_rgba(255,58,92,0.6)]">
+                            <Heart className="h-6 w-6 text-white" fill="currentColor" strokeWidth={0} />
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  {/* Floating match notification */}
+
                   <motion.div
-                    animate={{ y: [-4, 4, -4], x: [2, -2, 2] }}
-                    transition={{
-                      duration: 3.5,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute top-12 -right-14 glass border border-white/10 text-white text-sm font-bold px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-2.5 z-20"
+                    animate={{ y: [-4, 4, -4] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="surface-glow absolute -right-10 top-14 z-20 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white"
                   >
-                    <span className="text-xl drop-shadow-md">🎉</span>
-                    <span className="drop-shadow-sm">It&apos;s a Match!</span>
+                    <Heart className="h-4 w-4 text-accent-primary" fill="currentColor" strokeWidth={0} />
+                    It&apos;s a match
                   </motion.div>
-                </motion.div>
+                </div>
               </div>
             </div>
           </motion.div>
