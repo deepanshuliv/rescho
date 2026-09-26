@@ -3,10 +3,8 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui";
-import Link from "next/link";
+import { Button, PageShell, PageHeading } from "@/components/ui";
 import {
-  ChevronLeft,
   Search,
   Loader2,
   MapPin,
@@ -168,7 +166,8 @@ function LocationContent() {
     );
   }, []);
 
-  const searchLocation = async () => {
+  const searchLocation = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
@@ -230,41 +229,23 @@ function LocationContent() {
   }, [detectLocation]);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-accent-secondary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-accent-primary/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Back Button */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/[0.05] hover:border-white/[0.1] text-text-secondary hover:text-white transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.05)] active:scale-95 mb-8 w-fit group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-sm font-medium font-display">Back</span>
-        </Link>
-
+    <PageShell>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold font-display mb-2">
-            Choose Your <span className="gradient-text-primary">Location</span>
-          </h1>
-          <p className="text-text-secondary mb-6 text-sm">
-            Where do you want to find restaurants?
-          </p>
+          <PageHeading
+            title={<>Choose your <span className="text-text-secondary">location</span></>}
+            subtitle="Where do you want to find restaurants?"
+          />
 
           {/* Iframe Notice */}
           {isInIframe && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-secondary/10 border border-accent-secondary/20 rounded-2xl p-3.5 mb-4 text-accent-secondary text-sm"
+              className="surface-glow mb-4 rounded-2xl p-3.5 text-sm text-text-secondary"
             >
               <div className="flex items-start gap-2">
                 <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -276,53 +257,62 @@ function LocationContent() {
             </motion.div>
           )}
 
-          {/* Search Input - Now Primary */}
-          <div className="flex gap-2 mb-4">
+          {/* Search */}
+          <form
+            onSubmit={searchLocation}
+            role="search"
+            className="mb-6 flex h-[52px] items-center gap-2 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.05] to-bg-secondary/80 pl-4 pr-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[border-color,box-shadow] focus-within:border-accent-primary/60 focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_4px_rgba(255,58,92,0.12)]"
+          >
+            <Search className="h-4 w-4 shrink-0 text-text-muted" aria-hidden />
+            <label htmlFor="location-search" className="sr-only">
+              Search city or neighborhood
+            </label>
             <input
-              type="text"
-              placeholder="Search city or neighborhood..."
+              id="location-search"
+              type="search"
+              placeholder="Search city or neighborhood"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && searchLocation()}
-              className="flex-1 bg-bg-secondary/90 border border-white/[0.06] rounded-2xl px-4 py-3 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-primary/50 transition-colors"
+              className="h-full min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted focus:outline-none"
             />
             <Button
-              variant="primary"
-              onClick={searchLocation}
+              type="submit"
+              size="sm"
               disabled={isLoading || !searchQuery.trim()}
-              className="px-4"
+              className="rounded-xl"
             >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <Search className="w-5 h-5" />
-              )}
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
             </Button>
-          </div>
+          </form>
 
           {/* Popular Cities */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs text-text-muted font-medium">Popular cities (India):</div>
-              <div className="flex items-center gap-1.5 text-[10px] text-accent-primary font-medium px-2.5 py-1 rounded-full border border-accent-primary/20 bg-accent-primary/10">
-                <Globe className="w-3 h-3" />
-                Global Search Supported
-              </div>
+            <div className="mb-3 flex items-center justify-between gap-4">
+              <p className="text-xs font-medium text-text-secondary">Popular in India</p>
+              <p className="flex items-center gap-1.5 text-[11px] text-text-muted">
+                <Globe className="h-3 w-3" />
+                Search works worldwide
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              {POPULAR_CITIES.map((city) => (
-                <button
-                  key={city.name}
-                  onClick={() => selectCity(city)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold font-display transition-all ${
-                    location?.name === city.name
-                      ? "bg-accent-primary text-white shadow-[0_4px_16px_rgba(255,58,92,0.3)]"
-                      : "bg-bg-secondary/80 text-text-secondary hover:bg-bg-tertiary hover:text-text-primary border border-white/[0.03]"
-                  }`}
-                >
-                  {city.name}
-                </button>
-              ))}
+              {POPULAR_CITIES.map((city) => {
+                const selected = location?.name === city.name;
+                return (
+                  <button
+                    key={city.name}
+                    type="button"
+                    onClick={() => selectCity(city)}
+                    aria-pressed={selected}
+                    className={`h-9 rounded-full px-4 font-display text-xs font-semibold ${
+                      selected
+                        ? "bg-brand-gradient text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                        : "border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.01] text-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] hover:border-white/[0.14] hover:text-text-primary"
+                    }`}
+                  >
+                    {city.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -339,21 +329,22 @@ function LocationContent() {
               <button
                 onClick={detectLocation}
                 disabled={isDetecting}
-                className="w-full p-4 bg-bg-secondary/70 rounded-2xl border border-white/[0.04] hover:border-accent-primary/30 transition-all mb-4 flex items-center gap-4 group"
+                type="button"
+                className="surface-glow group mb-4 flex w-full items-center gap-4 rounded-2xl p-4 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_20px_40px_-20px_rgba(0,0,0,0.8)]"
               >
-                <div className="w-11 h-11 rounded-xl bg-accent-primary/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <div className="icon-tile h-11 w-11">
                   {isDetecting ? (
-                    <Loader2 className="w-5 h-5 text-accent-primary animate-spin" />
+                    <Loader2 className="h-5 w-5 animate-spin text-white/80" />
                   ) : (
-                    <MapPin className="w-5 h-5 text-accent-primary" />
+                    <MapPin className="h-5 w-5 text-white/80" />
                   )}
                 </div>
                 <div className="text-left flex-1">
                   <div className="font-semibold text-text-primary font-display text-sm">
-                    Use Current Location
+                    Use current location
                   </div>
                   <div className="text-xs text-text-muted">
-                    {isDetecting ? "Detecting..." : "Auto-detect your location"}
+                    {isDetecting ? "Detecting..." : "Find restaurants around you"}
                   </div>
                 </div>
               </button>
@@ -363,9 +354,10 @@ function LocationContent() {
           {/* Error Message */}
           {error && (
             <motion.div
+              role="alert"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-error/10 border border-accent-error/20 rounded-2xl p-3 mb-4 text-accent-error text-xs"
+              className="mb-4 rounded-2xl border border-accent-error/20 bg-accent-error/10 p-3.5 text-xs leading-relaxed text-accent-error"
             >
               {error}
             </motion.div>
@@ -374,19 +366,20 @@ function LocationContent() {
           {/* Selected Location */}
           {location && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-accent-primary/10 border border-accent-primary/20 rounded-2xl p-4 mb-6"
+              role="status"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="surface-glow mb-6 rounded-2xl p-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent-primary/20 flex items-center justify-center">
+                <div className="icon-tile h-10 w-10">
                   <Check className="w-5 h-5 text-accent-primary" />
                 </div>
                 <div>
-                  <div className="font-semibold text-accent-primary font-display">
+                  <div className="font-display font-semibold text-text-primary">
                     {location.name}
                   </div>
-                  <div className="text-xs text-text-secondary">
+                  <div className="tabular text-xs text-text-secondary">
                     {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
                   </div>
                 </div>
@@ -402,19 +395,27 @@ function LocationContent() {
             disabled={!location}
             className="w-full"
           >
-            Continue to {mode === "join" ? "Join Room" : "Create Room"}
+            {location ? `Continue with ${location.name}` : "Pick a location to continue"}
           </Button>
         </motion.div>
-      </div>
-    </main>
+    </PageShell>
   );
 }
 
 function LocationLoading() {
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <div className="w-16 h-16 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
-    </main>
+    <PageShell>
+      <div className="w-full space-y-4" aria-busy="true" aria-label="Loading">
+        <div className="skeleton h-9 w-40 rounded-xl" />
+        <div className="skeleton h-4 w-64 rounded-md" />
+        <div className="skeleton mt-6 h-[52px] w-full rounded-2xl" />
+        <div className="flex gap-2">
+          {[64, 72, 80, 56, 76].map((w) => (
+            <div key={w} className="skeleton h-9 rounded-full" style={{ width: w }} />
+          ))}
+        </div>
+      </div>
+    </PageShell>
   );
 }
 
