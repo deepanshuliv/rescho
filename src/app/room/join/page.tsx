@@ -1,31 +1,50 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui";
+import { Button, PageShell, PageHeading } from "@/components/ui";
 import Link from "next/link";
 import { v4 as uuidv4 } from "uuid";
-import { ChevronLeft } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+
+const CODE_LENGTH = 6;
+
+const cleanCode = (value: string) =>
+  value.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, CODE_LENGTH);
 
 export default function JoinRoomPage() {
+  return (
+    <Suspense>
+      <JoinRoomContent />
+    </Suspense>
+  );
+}
+
+function JoinRoomContent() {
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const searchParams = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Prefill from shared links: /room/join?code=ABC123
+  const [code, setCode] = useState(() => cleanCode(searchParams.get("code") ?? ""));
+  const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleCodeChange = (value: string) => {
     // Only allow alphanumeric and convert to uppercase
-    const cleaned = value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-    if (cleaned.length <= 6) {
-      setCode(cleaned);
-    }
+    setCode(cleanCode(value));
     setError("");
   };
 
-  const joinRoom = async () => {
-    if (code.length !== 6) {
-      setError("Please enter a 6-character room code");
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const joinRoom = async (e?: FormEvent) => {
+    e?.preventDefault();
+    if (code.length !== CODE_LENGTH) {
+      setError("Enter the full 6-character room code.");
       return;
     }
 
@@ -60,97 +79,120 @@ export default function JoinRoomPage() {
       router.push(`/room/${data.roomId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to join room");
-    } finally {
       setIsLoading(false);
     }
   };
 
+  const activeIndex = Math.min(code.length, CODE_LENGTH - 1);
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-accent-secondary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-accent-primary/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Back Button */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/[0.05] hover:border-white/[0.1] text-text-secondary hover:text-white transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.05)] active:scale-95 mb-8 w-fit group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-sm font-medium font-display">Back</span>
-        </Link>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+    <PageShell>
+        <motion.form
+          onSubmit={joinRoom}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          noValidate
         >
-          <h1 className="text-3xl font-bold font-display mb-2">
-            Join a <span className="gradient-text-vivid">Room</span>
-          </h1>
-          <p className="text-text-secondary text-sm mb-8">
-            Enter the 6-character code from your partner
-          </p>
+          <PageHeading
+            title={<>Join a <span className="text-text-secondary">room</span></>}
+            subtitle="Enter the 6-character code your partner shared with you."
+          />
 
-          {/* Code Input */}
-          <div className="mb-6">
-            <div className="bg-bg-secondary/80 rounded-3xl border border-white/[0.06] p-5 focus-within:border-accent-primary/50 transition-colors backdrop-blur-xl shadow-2xl">
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => handleCodeChange(e.target.value)}
-                placeholder="XXXXXX"
-                className="w-full bg-transparent text-4xl font-mono font-bold text-center tracking-[0.3em] text-text-primary placeholder:text-text-muted focus:outline-none"
-                autoComplete="off"
-                autoCapitalize="characters"
-              />
+          <label htmlFor="room-code" className="mb-3 block text-xs font-medium text-text-secondary">
+            Room code
+          </label>
+          <div className="relative mb-3">
+            <input
+              ref={inputRef}
+              id="room-code"
+              type="text"
+              value={code}
+              onChange={(e) => handleCodeChange(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              maxLength={CODE_LENGTH}
+              autoComplete="one-time-code"
+              autoCapitalize="characters"
+              spellCheck={false}
+              aria-invalid={!!error}
+              aria-describedby={error ? "code-error" : undefined}
+              className="absolute inset-0 z-10 h-full w-full cursor-text opacity-0"
+            />
+            <div className="grid grid-cols-6 gap-2 sm:gap-2.5" aria-hidden>
+              {Array.from({ length: CODE_LENGTH }).map((_, i) => {
+                const char = code[i];
+                const isActive = isFocused && i === activeIndex;
+                return (
+                  <div
+                    key={i}
+                    className={`flex aspect-[4/5] items-center justify-center rounded-2xl border bg-gradient-to-b font-mono text-2xl font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[border-color,box-shadow,background-color] duration-200 sm:text-3xl ${
+                      error
+                        ? "border-accent-error/40 from-accent-error/[0.06] to-transparent"
+                        : isActive
+                          ? "border-accent-primary/60 from-white/[0.05] to-bg-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_3px_rgba(255,58,92,0.1)]"
+                          : char
+                            ? "border-white/[0.14] from-white/[0.06] to-bg-secondary"
+                            : "border-white/[0.07] from-white/[0.04] to-bg-secondary/60"
+                    }`}
+                  >
+                    {char ? (
+                      <motion.span
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-text-primary"
+                      >
+                        {char}
+                      </motion.span>
+                    ) : isActive ? (
+                      <span className="h-7 w-[2px] animate-pulse rounded-full bg-accent-primary" />
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
-            <p className="text-text-muted text-xs text-center mt-2">
-              {code.length}/6 characters
-            </p>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-accent-error/10 border border-accent-error/20 rounded-2xl p-3 mb-6 text-accent-error text-xs text-center"
-            >
-              {error}
-            </motion.div>
-          )}
+          <div className="mb-8 min-h-5">
+            {error ? (
+              <motion.p
+                id="code-error"
+                role="alert"
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-1.5 text-xs text-accent-error"
+              >
+                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                {error}
+              </motion.p>
+            ) : (
+              <p className="tabular text-xs text-text-muted">
+                {code.length}/{CODE_LENGTH} characters
+              </p>
+            )}
+          </div>
 
-          {/* Join Button */}
           <Button
-            variant="primary"
+            type="submit"
             size="lg"
-            onClick={joinRoom}
-            disabled={code.length !== 6 || isLoading}
+            disabled={code.length !== CODE_LENGTH}
             isLoading={isLoading}
-            className="w-full mb-4"
+            loadingText="Joining..."
+            className="w-full"
           >
             Join Room
           </Button>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-white/[0.06]" />
-            <span className="text-text-muted text-xs uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-white/[0.06]" />
-          </div>
-
-          {/* Create Room Link */}
-          <Link href="/room/create" className="block">
-            <Button variant="ghost" className="w-full text-xs">
-              Create a new room instead
-            </Button>
-          </Link>
-        </motion.div>
-      </div>
-    </main>
+          <p className="mt-8 text-center text-sm text-text-muted">
+            Don&apos;t have a code?{" "}
+            <Link
+              href="/location?mode=create"
+              className="font-semibold text-text-secondary underline-offset-4 hover:text-text-primary hover:underline"
+            >
+              Create a new room
+            </Link>
+          </p>
+        </motion.form>
+    </PageShell>
   );
 }
