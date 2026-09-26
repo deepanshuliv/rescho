@@ -1,40 +1,45 @@
-import { Hero, Features } from "@/components/landing";
+import Link from "next/link";
+import { Navbar, Hero, Features } from "@/components/landing";
+import { Logo } from "@/components/ui";
+
+const FOOTER_LINKS = [
+  { href: "#features", label: "How it works" },
+  { href: "/room/join", label: "Join a room" },
+  { href: "/location?mode=create", label: "Create a room" },
+];
 
 export default function Home() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-[100dvh]">
+      <Navbar />
       <Hero />
       <Features />
 
-      {/* Footer */}
-      <footer className="py-12 px-6 lg:px-16 border-t border-white/[0.04]">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-text-muted text-sm flex items-center gap-1.5">
-            <span className="gradient-text-primary font-bold font-display text-base tracking-tight">
-              RESCHO
-            </span>{" "}
-            &copy; {new Date().getFullYear()}
+      <footer className="border-t border-white/[0.05] px-6 py-10 lg:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-3 text-sm text-text-muted">
+            <Logo size={22} />
+            <span>&copy; {new Date().getFullYear()}</span>
           </div>
-          <div className="flex gap-8 text-sm text-text-secondary">
+          <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-text-secondary">
+            {FOOTER_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="hover:text-text-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
             <a
-              href="#"
-              className="hover:text-text-primary transition-colors duration-200"
+              href="https://foursquare.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted hover:text-text-secondary"
             >
-              About
+              Powered by Foursquare
             </a>
-            <a
-              href="#"
-              className="hover:text-text-primary transition-colors duration-200"
-            >
-              Privacy
-            </a>
-            <a
-              href="#"
-              className="hover:text-text-primary transition-colors duration-200"
-            >
-              Terms
-            </a>
-          </div>
+          </nav>
         </div>
       </footer>
     </main>
