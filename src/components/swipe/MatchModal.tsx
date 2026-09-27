@@ -56,15 +56,17 @@ export default function MatchModal({
   onViewMatches,
 }: MatchModalProps) {
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    if (!isOpen) return;
+    document.body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", onKey);
     };
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -91,26 +93,34 @@ export default function MatchModal({
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            onClick={onClose}
           >
             <div
-              className="bg-bg-secondary/95 backdrop-blur-2xl rounded-3xl max-w-sm w-full overflow-hidden border border-white/[0.08] shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="match-title"
+              className="surface-glow rounded-[2rem] max-w-sm w-full overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Restaurant Image — Gradient + Emoji */}
-              <div
-                className="relative h-48 w-full"
-                style={{
-                  background:
-                    restaurant.gradient ||
-                    "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
-                }}
-              >
-                <div className="absolute inset-0 flex items-center justify-center opacity-30">
-                  <span style={{ fontSize: "100px", lineHeight: 1 }}>
-                    {restaurant.emoji || "🍽️"}
-                  </span>
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-bg-secondary via-transparent to-transparent" />
+              {/* Header art: same treatment as the swipe card */}
+              <div className="relative h-44 w-full overflow-hidden bg-[#0c0c10]">
+                <div
+                  className="absolute inset-0 opacity-25"
+                  style={{
+                    background:
+                      restaurant.gradient ||
+                      "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
+                    maskImage: "radial-gradient(120% 90% at 50% 0%, #000 0%, transparent 75%)",
+                    WebkitMaskImage: "radial-gradient(120% 90% at 50% 0%, #000 0%, transparent 75%)",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  className="absolute inset-0 flex select-none items-center justify-center font-display text-[9rem] font-bold leading-none tracking-tighter text-white/[0.06]"
+                >
+                  {restaurant.name.charAt(0)}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e14] via-transparent to-transparent" />
               </div>
 
               {/* Content */}
@@ -120,14 +130,14 @@ export default function MatchModal({
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ type: "spring", delay: 0.2 }}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-accent-primary to-[#d4284a] text-white px-6 py-2 rounded-full font-bold font-display text-sm mb-4 shadow-lg shadow-accent-primary/40"
+                  className="btn-sheen inline-flex items-center gap-2 bg-brand-gradient text-white px-6 py-2.5 rounded-full font-bold font-display text-sm mb-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_12px_32px_-6px_rgba(255,58,92,0.7)]"
                 >
                   <Heart
                     className="w-5 h-5"
                     fill="currentColor"
                     strokeWidth={0}
                   />
-                  IT&apos;S A MATCH!
+                  It&apos;s a match
                 </motion.div>
 
                 {/* Restaurant Name */}
@@ -135,6 +145,7 @@ export default function MatchModal({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
+                  id="match-title"
                   className="text-2xl font-bold font-display text-text-primary mb-2"
                 >
                   {restaurant.name}
@@ -181,14 +192,14 @@ export default function MatchModal({
                     onClick={onViewMatches}
                     className="w-full"
                   >
-                    View All Matches
+                    View all matches
                   </Button>
                   <Button
                     variant="ghost"
                     onClick={onContinue}
                     className="w-full"
                   >
-                    Keep Swiping
+                    Keep swiping
                   </Button>
                 </motion.div>
               </div>
