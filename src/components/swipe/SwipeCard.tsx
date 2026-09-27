@@ -5,6 +5,17 @@ import { Restaurant } from "@/types";
 import Image from "next/image";
 import { MapPin, Star } from "lucide-react";
 
+export type SwipeDirection = "left" | "right";
+
+const cardVariants = {
+  exit: (direction: SwipeDirection | null) => ({
+    x: direction === "right" ? 420 : -420,
+    rotate: direction === "right" ? 18 : -18,
+    opacity: 0,
+    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+};
+
 interface SwipeCardProps {
   restaurant: Restaurant;
   onSwipe: (direction: "left" | "right") => void;
@@ -46,7 +57,6 @@ export default function SwipeCard({
   const gradient =
     restaurant.gradient ||
     "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)";
-  const emoji = restaurant.emoji || "🍽️";
 
   return (
     <motion.div
@@ -62,56 +72,57 @@ export default function SwipeCard({
       dragElastic={0.9}
       onDragEnd={handleDragEnd}
       whileTap={isTop ? { scale: 1.02 } : undefined}
+      variants={cardVariants}
       initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: isTop ? 1 : 0.95, opacity: 1 }}
-      exit={{
-        x: x.get() > 0 ? 300 : -300,
-        opacity: 0,
-        transition: { duration: 0.3 },
-      }}
+      animate={{ scale: isTop ? 1 : 0.95, y: isTop ? 0 : 10, opacity: 1 }}
+      exit="exit"
+      aria-hidden={!isTop}
     >
       <div
-        className="relative w-full h-full rounded-3xl overflow-hidden border border-white/[0.08] shadow-2xl"
-        style={{ backgroundColor: "#1a1a1a" }}
+        className="relative w-full h-full rounded-[1.75rem] overflow-hidden ring-1 ring-white/[0.1] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_30px_60px_-20px_rgba(0,0,0,0.85)]"
       >
-        {/* Restaurant Background — Gradient + Icon */}
-        <div className="absolute inset-0" style={{ background: gradient }}>
-          {/* Decorative pattern overlay */}
+        {/* Background: dark base, faint cuisine tint, oversized initial */}
+        <div className="absolute inset-0 bg-[#0c0c10]">
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 opacity-[0.22]"
             style={{
-              backgroundImage: `radial-gradient(circle at 20% 80%, rgba(255,255,255,0.06) 0%, transparent 50%),
-                               radial-gradient(circle at 80% 20%, rgba(255,255,255,0.04) 0%, transparent 50%)`,
+              background: gradient,
+              maskImage: "radial-gradient(120% 80% at 50% 0%, #000 0%, transparent 70%)",
+              WebkitMaskImage: "radial-gradient(120% 80% at 50% 0%, #000 0%, transparent 70%)",
             }}
           />
-          {/* Large emoji as visual anchor */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <span style={{ fontSize: "180px", lineHeight: 1 }}>{emoji}</span>
-          </div>
+          <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(255,255,255,0.06),transparent_70%)]" />
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -right-4 top-2 select-none font-display text-[15rem] font-bold leading-none tracking-tighter text-white/[0.045]"
+          >
+            {restaurant.name.charAt(0)}
+          </span>
           {/* Foursquare category icon */}
-          <div className="absolute top-6 right-6 w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+          <div className="icon-tile absolute left-6 top-6 h-14 w-14 overflow-hidden rounded-2xl">
             <Image
               src={restaurant.image}
-              alt={restaurant.cuisine}
-              width={42}
-              height={42}
-              className="object-contain"
+              alt=""
+              draggable={false}
+              width={56}
+              height={56}
+              className="h-full w-full object-cover opacity-90"
               unoptimized
             />
           </div>
-          {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+          {/* Fade for text readability */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         </div>
 
         {/* Like/Dislike Indicators */}
         <motion.div
-          className="absolute top-8 right-8 px-4 py-2 bg-accent-primary text-white font-bold font-display text-2xl rounded-2xl shadow-xl rotate-12 z-10"
+          className="absolute left-8 top-8 z-10 -rotate-12 rounded-2xl border-2 border-accent-primary bg-accent-primary/15 px-4 py-1.5 font-display text-2xl font-bold tracking-wide text-accent-primary backdrop-blur-sm"
           style={{ opacity: likeOpacity }}
         >
           LIKE
         </motion.div>
         <motion.div
-          className="absolute top-8 left-8 px-4 py-2 bg-accent-error text-white font-bold font-display text-2xl rounded-2xl shadow-xl -rotate-12 z-10"
+          className="absolute right-8 top-8 z-10 rotate-12 rounded-2xl border-2 border-white/70 bg-black/30 px-4 py-1.5 font-display text-2xl font-bold tracking-wide text-white backdrop-blur-sm"
           style={{ opacity: dislikeOpacity }}
         >
           NOPE
@@ -123,51 +134,42 @@ export default function SwipeCard({
           style={{ visibility: isTop ? "visible" : "hidden" }}
         >
           {/* Cuisine Tag */}
-          <div className="inline-flex items-center gap-2 bg-accent-secondary/20 backdrop-blur-sm px-3 py-1 rounded-full mb-3">
-            <span className="text-accent-secondary text-sm font-medium">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85 backdrop-blur-sm">
               {restaurant.cuisine}
             </span>
             {restaurant.priceLevel && (
-              <>
-                <span className="text-text-muted">•</span>
-                <span className="text-accent-primary text-sm font-medium font-display">
-                  {restaurant.priceLevel}
-                </span>
-              </>
+              <span className="rounded-full bg-white/10 px-3 py-1 font-display text-xs font-semibold text-accent-primary backdrop-blur-sm">
+                {restaurant.priceLevel}
+              </span>
+            )}
+            {restaurant.rating && (
+              <span className="tabular flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                <Star
+                  className="h-3 w-3 text-accent-primary"
+                  fill="currentColor"
+                  strokeWidth={0}
+                />
+                {restaurant.rating.toFixed(1)}
+              </span>
             )}
           </div>
 
           {/* Restaurant Name */}
-          <h2 className="text-3xl font-bold font-display text-white mb-2">
+          <h2 className="mb-2 font-display text-3xl font-bold leading-tight tracking-tight text-white">
             {restaurant.name}
           </h2>
 
           {/* Description */}
-          <p className="text-text-secondary text-sm mb-3">
+          <p className="mb-4 line-clamp-2 text-sm text-white/70">
             {restaurant.description}
           </p>
 
           {/* Address */}
-          <div className="flex items-center gap-2 text-text-muted text-sm">
-            <MapPin className="w-4 h-4" />
+          <div className="flex items-center gap-2 text-xs text-white/55">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{restaurant.address}</span>
           </div>
-
-          {/* Rating */}
-          {restaurant.rating && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex items-center gap-1 bg-accent-primary/20 px-2 py-1 rounded-lg">
-                <Star
-                  className="w-4 h-4 text-accent-primary"
-                  fill="currentColor"
-                  strokeWidth={0}
-                />
-                <span className="text-accent-primary font-semibold text-sm">
-                  {restaurant.rating.toFixed(1)}
-                </span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </motion.div>
