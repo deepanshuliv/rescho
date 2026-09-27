@@ -3,13 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Button, ShareModal } from "@/components/ui";
-import Link from "next/link";
-import Image from "next/image";
+import { Button, ShareModal, PageShell, PageHeading } from "@/components/ui";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@clerk/nextjs";
 import {
-  ChevronLeft,
   AlertTriangle,
   Check,
   Copy,
@@ -155,101 +152,93 @@ export default function CreateRoomPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <div className="w-16 h-16 border-4 border-accent-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-text-secondary">Creating your room...</p>
-        </motion.div>
-      </main>
+      <PageShell hideBack>
+        <div className="w-full text-center" aria-busy="true">
+          <div className="skeleton mx-auto mb-3 h-10 w-56 rounded-xl" />
+          <div className="skeleton mx-auto mb-10 h-4 w-64 rounded-md" />
+          <div className="skeleton mb-6 h-44 w-full rounded-[1.75rem]" />
+          <p className="text-sm text-text-secondary">Creating your room...</p>
+        </div>
+      </PageShell>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-accent-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-accent-error" />
+      <PageShell>
+        <div className="text-center" role="alert">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-error/20 bg-accent-error/10">
+            <AlertTriangle className="h-6 w-6 text-accent-error" />
           </div>
-          <p className="text-accent-error mb-4">{error}</p>
-          <Button variant="primary" onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
+          <h1 className="mb-2 font-display text-xl font-semibold text-text-primary">
+            We couldn&apos;t create your room
+          </h1>
+          <p className="mb-8 text-sm text-text-secondary">{error}</p>
+          <div className="flex flex-col items-center gap-3">
+            <Button onClick={() => window.location.reload()} className="w-full">
+              Try again
+            </Button>
+            <Button href="/" variant="ghost" className="w-full">
+              Back to home
+            </Button>
+          </div>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-accent-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-accent-secondary/5 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-md relative z-10">
-        {/* Back Button */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/[0.05] hover:border-white/[0.1] text-text-secondary hover:text-white transition-all duration-300 hover:shadow-[0_4px_16px_rgba(255,255,255,0.05)] active:scale-95 mb-8 w-fit group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          <span className="text-sm font-medium font-display">Back</span>
-        </Link>
-
+    <PageShell backHref="/location?mode=create" backLabel="Change location">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center"
         >
-          <h1 className="text-3xl font-bold font-display mb-2">
-            Room <span className="gradient-text-primary">Created!</span>
-          </h1>
-          <p className="text-text-secondary text-sm mb-8">
-            Share this code with your partner to join
-          </p>
+          <PageHeading
+            align="center"
+            title={<>Your room is <span className="text-text-secondary">ready</span></>}
+            subtitle="Share this code with your partner so they can join."
+          />
 
           {/* Room Code Display */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="bg-bg-secondary/80 rounded-3xl border border-white/[0.06] p-8 mb-6 backdrop-blur-xl shadow-2xl"
+            className="surface-glow relative mb-6 rounded-[1.75rem] p-3"
           >
-            <div className="text-5xl font-mono font-bold tracking-[0.3em] text-accent-primary mb-4">
-              {roomCode}
-            </div>
-            <div className="flex items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                onClick={copyCode}
-                className="text-text-secondary hover:text-accent-primary text-xs"
-              >
+            <div className="halo -z-10" aria-hidden />
+            <button
+              type="button"
+              onClick={copyCode}
+              aria-label={`Room code ${roomCode}. Click to copy.`}
+              className="w-full rounded-2xl py-7 hover:bg-white/[0.02]"
+            >
+              <span className="block pl-[0.3em] font-mono text-accent-primary text-5xl font-bold tracking-[0.3em]">
+                {roomCode}
+              </span>
+              <span className="mt-3 block text-[11px] text-text-muted" aria-live="polite">
+                {copied ? "Copied to clipboard" : "Tap the code to copy"}
+              </span>
+            </button>
+            <div className="grid grid-cols-2 gap-2 border-t border-white/[0.05] pt-3">
+              <Button variant="ghost" size="sm" onClick={copyCode} className="rounded-xl">
                 {copied ? (
                   <>
-                    <Check className="w-4 h-4 mr-1.5" />
-                    Copied!
+                    <Check className="h-4 w-4 text-accent-primary" />
+                    Copied
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 mr-1.5" />
-                    Copy Code
+                    <Copy className="h-4 w-4" />
+                    Copy code
                   </>
                 )}
               </Button>
-              <Button
-                variant="ghost"
-                onClick={handleShare}
-                className="text-text-secondary hover:text-accent-primary text-xs"
-              >
-                <Share2 className="w-4 h-4 mr-1.5" />
-                Share
+              <Button variant="ghost" size="sm" onClick={handleShare} className="rounded-xl">
+                <Share2 className="h-4 w-4" />
+                Share link
               </Button>
             </div>
           </motion.div>
@@ -270,26 +259,29 @@ export default function CreateRoomPage() {
             className="mb-8"
           >
             <div className="flex items-center justify-center gap-4 mb-4">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-accent-primary/40 shadow-lg bg-bg-tertiary">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/15 bg-bg-tertiary">
                 <img
                   src={user?.imageUrl || "/avatars/avatar-user.webp"}
                   alt={user?.firstName || "You"}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <motion.div
-                animate={{ opacity: [0.3, 1, 0.3] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="text-text-muted text-sm font-bold tracking-widest"
-              >
-                • • •
-              </motion.div>
+              <div className="flex gap-1.5" aria-hidden>
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    animate={{ opacity: [0.2, 1, 0.2] }}
+                    transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.2 }}
+                    className="h-1.5 w-1.5 rounded-full bg-text-secondary"
+                  />
+                ))}
+              </div>
               <div className="w-12 h-12 rounded-full bg-bg-tertiary/60 border border-white/[0.08] flex items-center justify-center">
                 <Plus className="w-5 h-5 text-text-muted" />
               </div>
             </div>
-            <p className="text-text-secondary text-xs">
-              Waiting for partner to join...
+            <p className="text-xs text-text-secondary" aria-live="polite">
+              Waiting for your partner to join
             </p>
           </motion.div>
 
@@ -302,11 +294,10 @@ export default function CreateRoomPage() {
           >
             Start Swiping
           </Button>
-          <p className="text-text-muted text-xs mt-2">
-            Or wait for your partner to join
+          <p className="mt-3 text-xs text-text-muted">
+            You can start now. Your partner can join at any time.
           </p>
         </motion.div>
-      </div>
 
       {/* Share Modal */}
       {roomCode && (
@@ -317,6 +308,6 @@ export default function CreateRoomPage() {
           url={typeof window !== "undefined" ? `${window.location.origin}/room/join?code=${roomCode}` : ""}
         />
       )}
-    </main>
+    </PageShell>
   );
 }
