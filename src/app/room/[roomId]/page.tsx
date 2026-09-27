@@ -4,19 +4,17 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { SwipeStack, MatchModal } from "@/components/swipe";
-import { Button } from "@/components/ui";
+import { Button, ShareModal, AppHeader, PageShell } from "@/components/ui";
 import { Restaurant } from "@/types";
-import Link from "next/link";
 import Image from "next/image";
 import {
   X,
   Heart,
   Plus,
-  Eye,
   AlertTriangle,
-  Wifi,
   WifiOff,
   Share2,
+  LogOut,
 } from "lucide-react";
 
 interface MatchData {
@@ -52,6 +50,7 @@ export default function SwipePage() {
 
   // Matches drawer state
   const [showMatches, setShowMatches] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const matchPollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -250,32 +249,15 @@ export default function SwipePage() {
     [roomId, seenMatchIds, pollRoomState],
   );
 
-  const handleShare = async () => {
-    if (!roomCode) return;
-
-    const shareData = {
-      title: "Join my Rescho Room!",
-      text: `Join my restaurant matching room on Rescho! Use code: ${roomCode}`,
-      url: `${window.location.origin}/room/join?code=${roomCode}`,
+  // Close the matches drawer with Escape
+  useEffect(() => {
+    if (!showMatches) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowMatches(false);
     };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (err) {
-        if ((err as Error).name !== "AbortError") {
-          console.error("Share failed:", err);
-        }
-      }
-    } else {
-      try {
-        await navigator.clipboard.writeText(roomCode);
-        alert("Room code copied to clipboard!");
-      } catch {
-        console.error("Clipboard copy failed");
-      }
-    }
-  };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showMatches]);
 
   const handleLeaveRoom = () => {
     if (pollTimerRef.current) clearInterval(pollTimerRef.current);
@@ -292,191 +274,198 @@ export default function SwipePage() {
   // ─────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-bg-primary">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center px-6"
-        >
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-bg-tertiary" />
-            <div className="absolute inset-0 rounded-full border-4 border-accent-primary border-t-transparent animate-spin" />
+      <div className="flex min-h-[100dvh] flex-col">
+      <AppHeader />
+      <main className="flex flex-1 flex-col items-center justify-center px-5 pb-10">
+        <div className="w-full max-w-sm" aria-busy="true">
+          <div className="skeleton relative h-[440px] w-full overflow-hidden rounded-[1.75rem]">
+            <div className="absolute inset-x-6 bottom-6 space-y-3">
+              <div className="h-6 w-24 rounded-full bg-white/[0.05]" />
+              <div className="h-8 w-3/4 rounded-lg bg-white/[0.06]" />
+              <div className="h-4 w-full rounded-md bg-white/[0.04]" />
+              <div className="h-4 w-2/3 rounded-md bg-white/[0.04]" />
+            </div>
+          </div>
+          <div className="mt-8 flex justify-center gap-8">
+            <div className="skeleton h-[4.5rem] w-[4.5rem] rounded-full" />
+            <div className="skeleton h-[4.5rem] w-[4.5rem] rounded-full" />
           </div>
           <motion.p
             key={loadingMessage}
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-text-secondary text-base"
+            className="mt-8 text-center text-sm text-text-secondary"
+            aria-live="polite"
           >
             {loadingMessage}
           </motion.p>
-          <p className="text-text-muted text-xs mt-2">
-            This may take a few seconds on first load
+          <p className="mt-1 text-center text-xs text-text-muted">
+            This can take a few seconds on first load
           </p>
-        </motion.div>
+        </div>
       </main>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4 bg-bg-primary">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-accent-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle className="w-8 h-8 text-accent-error" />
+      <PageShell>
+        <div className="text-center" role="alert">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent-error/20 bg-accent-error/10">
+            <AlertTriangle className="h-6 w-6 text-accent-error" />
           </div>
-          <h2 className="text-text-primary font-semibold mb-2">
-            Something went wrong
-          </h2>
-          <p className="text-accent-error mb-6 text-sm">{error}</p>
-          <Link href="/">
-            <Button variant="primary">Go Home</Button>
-          </Link>
+          <h1 className="mb-2 font-display text-xl font-semibold text-text-primary">
+            We couldn&apos;t open this room
+          </h1>
+          <p className="mb-8 text-sm text-text-secondary">{error}</p>
+          <div className="flex flex-col gap-3">
+            <Button href="/room/join" className="w-full">
+              Enter a different code
+            </Button>
+            <Button href="/" variant="ghost" className="w-full">
+              Back to home
+            </Button>
+          </div>
         </div>
-      </main>
+      </PageShell>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-bg-primary">
-      {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
-        {/* Left spacer to keep room code centred */}
-        <div className="w-10" />
-
-        <div className="flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-[10px] uppercase tracking-wider text-text-muted mb-0.5 font-medium font-display">
-              Room Code
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="font-mono font-bold text-accent-primary text-lg tracking-[0.2em]">
-                {roomCode}
-              </div>
-              <button
-                onClick={handleShare}
-                className="p-1.5 rounded-lg bg-bg-tertiary/50 text-text-secondary hover:text-accent-primary transition-colors"
-                title="Share Room Code"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Connection indicator */}
-          <div className="flex items-center gap-1.5">
-            {isConnected ? (
-              <Wifi className="w-3.5 h-3.5 text-accent-primary" />
-            ) : (
-              <WifiOff className="w-3.5 h-3.5 text-accent-error animate-pulse" />
-            )}
-          </div>
-
-          {/* Matches button */}
+    <main className="flex min-h-[100dvh] flex-col">
+      {/* Header: same floating islands as the rest of the site */}
+      <AppHeader
+        left={
           <button
-            onClick={() => setShowMatches(true)}
-            className="relative p-2 text-text-secondary hover:text-accent-primary transition-colors"
+            type="button"
+            onClick={handleLeaveRoom}
+            className="island group flex h-12 items-center gap-2 pl-1.5 pr-4 font-display text-[13px] font-medium text-white/60 hover:text-white"
           >
-            <Heart className="w-6 h-6" fill="currentColor" strokeWidth={0} />
-            {matches.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-accent-primary text-white text-xs font-bold rounded-full flex items-center justify-center font-display shadow-lg shadow-accent-primary/40">
-                {matches.length}
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.05] transition-colors group-hover:bg-white/[0.1]">
+              <LogOut className="h-4 w-4" />
+            </span>
+            <span className="hidden sm:inline">Leave room</span>
+          </button>
+        }
+        center={
+          <button
+            type="button"
+            onClick={() => roomCode && setShowShare(true)}
+            className="island group flex h-12 items-center gap-3 pl-5 pr-1.5"
+            aria-label={`Room code ${roomCode}. Share with your partner.`}
+          >
+            <span className="hidden text-[11px] font-medium text-text-muted sm:inline">Room</span>
+            <span className="pl-[0.15em] font-mono text-[15px] font-bold tracking-[0.15em] text-accent-primary">
+              {roomCode}
+            </span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.05] text-white/60 transition-colors group-hover:bg-white/[0.1] group-hover:text-white">
+              <Share2 className="h-4 w-4" />
+            </span>
+          </button>
+        }
+        right={
+          <div className="flex items-center gap-2">
+            {!isConnected && (
+              <span
+                className="island flex h-12 items-center gap-1.5 px-4 text-[12px] font-medium text-accent-error"
+                role="status"
+              >
+                <WifiOff className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Offline</span>
               </span>
             )}
-          </button>
-        </div>
-      </header>
-
-      {/* Partner Status with Real Human Avatars */}
-      <div className="px-4 py-2.5 bg-bg-secondary/60 backdrop-blur-md border-b border-white/[0.04]">
-        <div className="flex items-center justify-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-accent-primary/40 shadow-md">
-              <Image
-                src="/avatars/avatar-user.webp"
-                alt="You"
-                fill
-                className="object-cover"
-                sizes="32px"
-              />
-            </div>
-            <span className="text-xs text-text-primary font-semibold font-display">You</span>
-          </div>
-
-          <motion.div
-            animate={{ opacity: [0.3, 1, 0.3] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-text-muted text-xs tracking-widest font-bold"
-          >
-            •••
-          </motion.div>
-
-          <div className="flex items-center gap-2">
-            <AnimatePresence mode="wait">
-              {partnerConnected ? (
-                <motion.div
-                  key="connected"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="relative w-8 h-8 rounded-full overflow-hidden ring-2 ring-accent-secondary/50 shadow-md"
-                >
-                  <Image
-                    src="/avatars/avatar-partner.webp"
-                    alt="Partner"
-                    fill
-                    className="object-cover"
-                    sizes="32px"
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="waiting"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  className="w-8 h-8 rounded-full bg-bg-tertiary/60 border border-white/[0.08] flex items-center justify-center"
-                >
-                  <Plus className="w-3.5 h-3.5 text-text-muted" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <span
-              className={`text-xs font-semibold font-display ${
-                partnerConnected ? "text-text-primary" : "text-text-muted"
-              }`}
+            <button
+              type="button"
+              onClick={() => setShowMatches(true)}
+              aria-label={`View matches (${matches.length})`}
+              className="island group flex h-12 items-center gap-2 pl-1.5 pr-4 font-display text-[13px] font-medium text-white/60 hover:text-white"
             >
-              {partnerConnected ? "Partner ✓" : "Waiting..."}
-            </span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.05] transition-colors group-hover:bg-white/[0.1]">
+                <Heart
+                  className={`h-4 w-4 ${matches.length > 0 ? "text-accent-primary" : ""}`}
+                  fill="currentColor"
+                  strokeWidth={0}
+                />
+              </span>
+              <span className="hidden sm:inline">Matches</span>
+              <motion.span
+                key={matches.length}
+                initial={{ scale: 0.7 }}
+                animate={{ scale: 1 }}
+                className="tabular text-white"
+              >
+                {matches.length}
+              </motion.span>
+            </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Stats Bar */}
-      <div className="flex items-center justify-center gap-6 px-4 py-2 text-xs border-b border-white/[0.03]">
-        <div className="flex items-center gap-1.5 text-text-secondary">
-          <Eye className="w-3.5 h-3.5" />
-          <span>{swipeCount} viewed</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-accent-primary font-medium">
-          <Heart className="w-3.5 h-3.5" fill="currentColor" strokeWidth={0} />
-          <span>{matches.length} matches</span>
+      {/* Partner status */}
+      <div className="mx-auto mt-6 w-full max-w-sm px-4">
+        <div className="island flex h-12 items-center justify-between pl-2 pr-4">
+          <div className="flex items-center gap-3">
+            <div className="flex -space-x-2">
+              <div className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-zinc-950">
+                <Image
+                  src="/avatars/avatar-user.webp"
+                  alt="You"
+                  fill
+                  className="object-cover"
+                  sizes="32px"
+                />
+              </div>
+              <AnimatePresence mode="wait">
+                {partnerConnected ? (
+                  <motion.div
+                    key="connected"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    className="relative h-8 w-8 overflow-hidden rounded-full ring-2 ring-zinc-950"
+                  >
+                    <Image
+                      src="/avatars/avatar-partner.webp"
+                      alt="Partner"
+                      fill
+                      className="object-cover"
+                      sizes="32px"
+                    />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="waiting"
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.8, opacity: 0 }}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-white/[0.15] bg-zinc-900 ring-2 ring-zinc-950"
+                  >
+                    <Plus className="h-3.5 w-3.5 text-text-muted" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <p className="font-display text-[13px] font-medium text-text-primary" aria-live="polite">
+              {partnerConnected ? "Partner joined" : "Waiting for partner"}
+            </p>
+          </div>
+          <span className="tabular text-[12px] text-text-muted">{swipeCount} seen</span>
         </div>
       </div>
 
       {/* Swipe Area */}
-      <div className="flex-1 px-4 py-4 overflow-hidden">
+      <div className="flex-1 overflow-hidden px-4 py-5">
         <SwipeStack
           restaurants={restaurants}
           onSwipe={handleSwipe}
           matchCount={matches.length}
+          keyboardEnabled={!showMatchModal && !showMatches && !showShare}
         />
       </div>
 
       {/* Footer Attribution */}
-      <footer className="px-4 py-2 text-center border-t border-white/[0.04]">
+      <footer className="px-4 pb-3 pt-1 text-center">
         <a
           href="https://foursquare.com"
           target="_blank"
@@ -502,6 +491,20 @@ export default function SwipePage() {
         }}
       />
 
+      {/* Share Modal */}
+      {roomCode && (
+        <ShareModal
+          isOpen={showShare}
+          onClose={() => setShowShare(false)}
+          roomCode={roomCode}
+          url={
+            typeof window !== "undefined"
+              ? `${window.location.origin}/room/join?code=${roomCode}`
+              : ""
+          }
+        />
+      )}
+
       {/* Matches Drawer */}
       <AnimatePresence>
         {showMatches && (
@@ -510,66 +513,78 @@ export default function SwipePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
+              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
               onClick={() => setShowMatches(false)}
+              aria-hidden
             />
             <motion.div
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-bg-secondary/95 backdrop-blur-2xl border-l border-white/[0.06] z-50 overflow-y-auto"
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="matches-title"
+              className="fixed bottom-0 right-0 top-0 z-50 w-full max-w-sm overflow-y-auto border-l border-white/[0.06] bg-bg-secondary/95 backdrop-blur-2xl"
             >
-              <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
-                <h2 className="text-xl font-bold font-display">
-                  Matches ({matches.length})
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-white/[0.04] bg-bg-secondary/90 px-5 py-4 backdrop-blur-xl">
+                <h2 id="matches-title" className="font-display text-xl font-bold">
+                  Matches{" "}
+                  <span className="tabular text-text-muted">{matches.length}</span>
                 </h2>
                 <button
+                  type="button"
                   onClick={() => setShowMatches(false)}
-                  className="text-text-secondary hover:text-text-primary p-1"
+                  aria-label="Close matches"
+                  autoFocus
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-white/[0.06] hover:text-text-primary"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
               {matches.length === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="w-16 h-16 rounded-full bg-accent-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Heart className="w-8 h-8 text-accent-primary" />
+                <div className="px-8 py-16 text-center">
+                  <div className="icon-tile mx-auto mb-5 h-14 w-14">
+                    <Heart className="h-6 w-6 text-accent-primary" />
                   </div>
-                  <p className="text-text-primary font-semibold font-display">
-                    No matches yet!
+                  <p className="font-display font-semibold text-text-primary">
+                    No matches yet
                   </p>
-                  <p className="text-text-muted text-xs mt-1">
-                    Keep swiping to find restaurants you both like.
+                  <p className="mx-auto mt-1.5 max-w-[26ch] text-xs text-text-muted">
+                    When you both swipe right on the same place, it shows up here.
                   </p>
                 </div>
               ) : (
-                <div className="p-4 space-y-3">
+                <div className="space-y-2 p-4">
                   {matches.map((restaurant) => (
                     <motion.div
                       key={restaurant.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="bg-bg-tertiary/70 rounded-2xl p-4 flex gap-4 border border-white/[0.03] hover:border-accent-primary/20 transition-all"
+                      className="surface-glow flex gap-4 rounded-2xl p-3"
                     >
                       <div
-                        className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 relative flex items-center justify-center shadow-md"
-                        style={{
-                          background:
-                            restaurant.gradient ||
-                            "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
-                        }}
+                        className="icon-tile relative h-14 w-14 shrink-0 overflow-hidden"
                       >
-                        <span style={{ fontSize: "28px", lineHeight: 1 }}>
-                          {restaurant.emoji || "🍽️"}
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 opacity-30"
+                          style={{
+                            background:
+                              restaurant.gradient ||
+                              "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
+                          }}
+                        />
+                        <span className="relative font-display text-xl font-bold text-white/90">
+                          {restaurant.name.charAt(0)}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-text-primary font-display truncate text-sm">
                           {restaurant.name}
                         </h3>
-                        <p className="text-xs text-accent-secondary font-medium">
+                        <p className="text-xs font-medium text-text-secondary">
                           {restaurant.cuisine}
                         </p>
                         {restaurant.priceLevel && (
