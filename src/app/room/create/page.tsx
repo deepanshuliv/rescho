@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button, ShareModal, PageShell, PageHeading } from "@/components/ui";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@clerk/nextjs";
+import Image from "next/image";
+import { useSessionItem } from "@/lib/ui/useSessionItem";
 import {
   AlertTriangle,
   Check,
@@ -30,83 +32,80 @@ export default function CreateRoomPage() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [location, setLocation] = useState<LocationData | null>(null);
+  const storedLocation = useSessionItem("rescho_location");
+  const location = useMemo<LocationData | null>(() => {
+    try {
+      return storedLocation ? (JSON.parse(storedLocation) as LocationData) : null;
+    } catch {
+      return null;
+    }
+  }, [storedLocation]);
+  const createStartedRef = useRef(false);
 
   useEffect(() => {
-    // Get location from sessionStorage or redirect to location page
-    const storedLocation = sessionStorage.getItem("rescho_location");
-
-    if (!storedLocation) {
+    // Location is chosen on the previous page; without it, go back there
+    const raw = sessionStorage.getItem("rescho_location");
+    if (!raw) {
       router.push("/location?mode=create");
       return;
     }
+    // Effects run twice in development; only ever create one room per visit
+    if (createStartedRef.current) return;
+    createStartedRef.current = true;
 
-    const locationData = JSON.parse(storedLocation) as LocationData;
-    setLocation(locationData);
+    const loc = JSON.parse(raw) as LocationData;
 
-    // Create room first, then pre-fetch restaurants and register them with the room
-    initializeRoom(locationData);
+    // The state endpoint fetches and stores the room's list server-side.
+    // Caching that exact list guarantees both partners swipe the same cards.
+    const prefetchRestaurants = async (roomId: string, userId: string) => {
+      try {
+        const response = await fetch(
+          `/api/rooms/${roomId}/state?userId=${encodeURIComponent(userId)}`,
+          { cache: "no-store" },
+        );
+        const data = await response.json();
+        if (data.restaurants?.length > 0) {
+          sessionStorage.setItem("rescho_restaurants", JSON.stringify(data.restaurants));
+        }
+      } catch (err) {
+        console.error("Pre-fetch restaurants failed (will retry on swipe page):", err);
+      }
+    };
+
+    const createRoom = async () => {
+      try {
+        // Generate userId before room creation so we can register the creator server-side
+        const userId = uuidv4();
+        // Drop any list cached for a previous room
+        sessionStorage.removeItem("rescho_restaurants");
+
+        const response = await fetch("/api/rooms/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ location: loc, userId }),
+        });
+        if (!response.ok) throw new Error("Failed to create room");
+
+        const data = await response.json();
+        sessionStorage.setItem("rescho_user_id", userId);
+        sessionStorage.setItem("rescho_room_id", data.roomId);
+        sessionStorage.setItem("rescho_room_code", data.code);
+        sessionStorage.setItem("rescho_is_creator", "true");
+
+        setRoomCode(data.code);
+        setRoomId(data.roomId);
+        setIsLoading(false);
+
+        prefetchRestaurants(data.roomId, userId);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to create room. Please try again.");
+        setIsLoading(false);
+      }
+    };
+
+    createRoom();
   }, [router]);
-
-  const initializeRoom = async (loc: LocationData) => {
-    try {
-      // Generate userId before room creation so we can register the creator server-side
-      const userId = uuidv4();
-
-      // Step 1: Create the room (register creator at the same time)
-      const response = await fetch("/api/rooms/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: loc, userId }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create room");
-      }
-
-      const data = await response.json();
-      setRoomCode(data.code);
-      setRoomId(data.roomId);
-
-      // Store session data
-      sessionStorage.setItem("rescho_user_id", userId);
-      sessionStorage.setItem("rescho_room_id", data.roomId);
-      sessionStorage.setItem("rescho_room_code", data.code);
-      sessionStorage.setItem("rescho_is_creator", "true");
-
-      setIsLoading(false);
-
-      // Step 2: Pre-fetch restaurants and cache them for instant load on swipe page
-      prefetchAndRegisterRestaurants(data.roomId);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to create room. Please try again.");
-      setIsLoading(false);
-    }
-  };
-
-  const prefetchAndRegisterRestaurants = async (createdRoomId: string) => {
-    try {
-      // The state endpoint fetches and stores the room's list server-side.
-      // Caching that exact list guarantees both partners swipe the same cards.
-      const userId = sessionStorage.getItem("rescho_user_id");
-      if (!userId || !createdRoomId) return;
-      const response = await fetch(
-        `/api/rooms/${createdRoomId}/state?userId=${encodeURIComponent(userId)}`,
-        { cache: "no-store" },
-      );
-      const data = await response.json();
-      if (data.restaurants?.length > 0) {
-        // Cache locally for instant load on swipe page
-        sessionStorage.setItem("rescho_restaurants", JSON.stringify(data.restaurants));
-      }
-    } catch (err) {
-      console.error(
-        "Pre-fetch restaurants failed (will retry on swipe page):",
-        err,
-      );
-    }
-  };
 
   const copyCode = async () => {
     if (!roomCode) return;
@@ -249,10 +248,13 @@ export default function CreateRoomPage() {
           >
             <div className="flex items-center justify-center gap-4 mb-4">
               <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-white/15 bg-bg-tertiary">
-                <img
+                <Image
                   src={user?.imageUrl || "/avatars/avatar-user.webp"}
                   alt={user?.firstName || "You"}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="48px"
+                  className="object-cover"
+                  unoptimized
                 />
               </div>
               <div className="flex gap-1.5" aria-hidden>
