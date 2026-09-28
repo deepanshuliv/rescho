@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { roomId } = await params;
-    const room = getRoomById(roomId);
+    const room = await getRoomById(roomId);
 
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });

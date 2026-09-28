@@ -6,26 +6,16 @@ export interface Location {
   name: string;
 }
 
-export interface RoomUser {
-  id: string;
-  joinedAt: number;
-}
-
-export interface SwipeRecord {
-  restaurantId: string;
-  direction: 'left' | 'right';
-  timestamp: number;
-}
-
 export interface Room {
   id: string;
   code: string;
   location: Location;
-  users: RoomUser[];
+  /** Anonymous per-tab user IDs, at most two. */
+  users: string[];
   restaurants: Restaurant[];
-  swipes: Record<string, SwipeRecord[]>;
+  /** Restaurant IDs both users swiped right on. */
   matches: string[];
-  status: 'waiting' | 'active' | 'completed';
+  status: 'waiting' | 'active';
   createdAt: number;
 }
 

@@ -17,11 +17,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const room = createRoom(location);
+    const room = await createRoom(location);
 
     // Register creator immediately if userId provided
     if (userId) {
-      addUserToRoom(room.id, userId);
+      await addUserToRoom(room.id, userId);
     }
 
     return NextResponse.json({

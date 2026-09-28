@@ -18,14 +18,14 @@ export async function GET(
       return NextResponse.json({ error: "Room ID required" }, { status: 400 });
     }
 
-    const room = getRoomById(roomId);
+    const room = await getRoomById(roomId);
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
     // Register user as active if provided
     if (userId) {
-      addUserToRoom(roomId, userId);
+      await addUserToRoom(roomId, userId);
 
       // If room has no restaurants yet, fetch them now using the room's location
       if (room.restaurants.length === 0 && room.location) {
@@ -35,7 +35,7 @@ export async function GET(
             room.location.lng,
             15,
           );
-          setRoomRestaurants(roomId, restaurants);
+          await setRoomRestaurants(roomId, restaurants);
         } catch (err) {
           console.error("Failed to fetch restaurants for room:", err);
           // searchRestaurants already falls back to mock data internally
@@ -44,7 +44,7 @@ export async function GET(
     }
 
     // Re-fetch room after possible mutations
-    const updatedRoom = getRoomById(roomId);
+    const updatedRoom = await getRoomById(roomId);
     if (!updatedRoom) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }

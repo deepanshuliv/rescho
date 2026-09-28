@@ -1,147 +1,168 @@
-import { Room, Location } from "@/types";
+import { Room, Location, Restaurant } from "@/types";
 import { generateRoomCode } from "./codeGenerator";
+import { exec } from "./store";
 import { v4 as uuidv4 } from "uuid";
 
-/**
- * Shared storage for rooms, attached to globalThis to survive hot-reloads in development.
- */
-const g = globalThis as typeof globalThis & {
-  __rescho_rooms__: Map<string, Room>;
-  __rescho_codes__: Map<string, string>;
+/** Rooms expire after two hours without activity. */
+const ROOM_TTL_SECONDS = 2 * 60 * 60;
+const MAX_USERS = 2;
+const isDev = process.env.NODE_ENV !== "production";
+
+interface RoomMeta {
+  id: string;
+  code: string;
+  location: Location;
+  createdAt: number;
+}
+
+const keys = {
+  meta: (roomId: string) => `room:${roomId}`,
+  code: (code: string) => `code:${code.toUpperCase()}`,
+  users: (roomId: string) => `room:${roomId}:users`,
+  restaurants: (roomId: string) => `room:${roomId}:restaurants`,
+  likes: (roomId: string, userId: string) => `room:${roomId}:likes:${userId}`,
+  matches: (roomId: string) => `room:${roomId}:matches`,
+  devIndex: "rooms:dev-index",
 };
 
-if (!g.__rescho_rooms__) g.__rescho_rooms__ = new Map<string, Room>();
-if (!g.__rescho_codes__) g.__rescho_codes__ = new Map<string, string>();
+/** Extends the lifetime of every key belonging to a room. */
+function touch(meta: RoomMeta) {
+  return [
+    keys.meta(meta.id),
+    keys.code(meta.code),
+    keys.users(meta.id),
+    keys.restaurants(meta.id),
+    keys.matches(meta.id),
+  ].map((key) => ["EXPIRE", key, ROOM_TTL_SECONDS]);
+}
 
-const rooms = g.__rescho_rooms__;
-const codeToRoomId = g.__rescho_codes__;
-const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+async function getMeta(roomId: string): Promise<RoomMeta | undefined> {
+  const [raw] = await exec([["GET", keys.meta(roomId)]]);
+  return raw ? (JSON.parse(raw as string) as RoomMeta) : undefined;
+}
 
 /**
  * Creates a new room with a unique ID and human-readable code.
  */
-export function createRoom(location: Location): Room {
-  const roomId = uuidv4();
-  let code = generateRoomCode();
+export async function createRoom(location: Location): Promise<Room> {
+  const meta: RoomMeta = { id: uuidv4(), code: "", location, createdAt: Date.now() };
 
-  while (codeToRoomId.has(code)) {
-    code = generateRoomCode();
+  // Claim a code atomically (SET NX) so two rooms can never share one
+  for (let attempt = 0; attempt < 10 && !meta.code; attempt++) {
+    const code = generateRoomCode();
+    const [claimed] = await exec([
+      ["SET", keys.code(code), meta.id, "NX", "EX", ROOM_TTL_SECONDS],
+    ]);
+    if (claimed === "OK") meta.code = code;
   }
+  if (!meta.code) throw new Error("Could not allocate a room code");
 
-  const room: Room = {
-    id: roomId,
-    code,
-    location,
-    users: [],
-    restaurants: [],
-    swipes: {},
-    matches: [],
-    status: "waiting",
-    createdAt: Date.now(),
-  };
+  await exec([
+    ["SET", keys.meta(meta.id), JSON.stringify(meta), "EX", ROOM_TTL_SECONDS],
+    ...(isDev ? [["SADD", keys.devIndex, meta.id]] : []),
+  ]);
 
-  rooms.set(roomId, room);
-  codeToRoomId.set(code, roomId);
-
-  return room;
+  return { ...meta, users: [], restaurants: [], matches: [], status: "waiting" };
 }
 
-export function getRoomById(roomId: string): Room | undefined {
-  return rooms.get(roomId);
+/**
+ * Loads a room with its users, restaurant list and matches.
+ */
+export async function getRoomById(roomId: string): Promise<Room | undefined> {
+  const [raw, users, restaurants, matches] = await exec([
+    ["GET", keys.meta(roomId)],
+    ["SMEMBERS", keys.users(roomId)],
+    ["GET", keys.restaurants(roomId)],
+    ["SMEMBERS", keys.matches(roomId)],
+  ]);
+  if (!raw) return undefined;
+
+  const meta = JSON.parse(raw as string) as RoomMeta;
+  const userIds = (users as string[]) ?? [];
+  return {
+    ...meta,
+    users: userIds,
+    restaurants: restaurants ? (JSON.parse(restaurants as string) as Restaurant[]) : [],
+    matches: (matches as string[]) ?? [],
+    status: userIds.length >= MAX_USERS ? "active" : "waiting",
+  };
 }
 
 /**
  * Look up a room by its human-readable code (case-insensitive).
  */
-export function getRoomByCode(code: string): Room | undefined {
-  const roomId = codeToRoomId.get(code.toUpperCase());
-  return roomId ? rooms.get(roomId) : undefined;
+export async function getRoomByCode(code: string): Promise<Room | undefined> {
+  const [roomId] = await exec([["GET", keys.code(code)]]);
+  return roomId ? getRoomById(roomId as string) : undefined;
 }
 
 /**
- * Adds a user to a room if space is available.
+ * Adds a user to a room if space is available. Returns true if the user is
+ * (now) in the room.
  */
-export function addUserToRoom(roomId: string, userId: string): boolean {
-  const room = rooms.get(roomId);
-  if (!room) return false;
+export async function addUserToRoom(roomId: string, userId: string): Promise<boolean> {
+  const meta = await getMeta(roomId);
+  if (!meta) return false;
 
-  if (room.users.some((user) => user.id === userId)) return true;
-  if (room.users.length >= 2) return false;
+  const [added, count] = await exec([
+    ["SADD", keys.users(roomId), userId],
+    ["SCARD", keys.users(roomId)],
+    ...touch(meta),
+  ]);
 
-  room.users.push({ id: userId, joinedAt: Date.now() });
-
-  if (room.users.length === 2) {
-    room.status = "active";
+  // A new third person made the room overflow: undo their join
+  if (added === 1 && (count as number) > MAX_USERS) {
+    await exec([["SREM", keys.users(roomId), userId]]);
+    return false;
   }
-
   return true;
 }
 
 /**
- * Removes a user from a room and resets status to waiting if needed.
+ * Stores the restaurant list for a room. Only the first write wins, so both
+ * people always swipe the same list even if two requests race.
  */
-export function removeUserFromRoom(roomId: string, userId: string): boolean {
-  const room = rooms.get(roomId);
-  if (!room) return false;
-
-  room.users = room.users.filter((user) => user.id !== userId);
-
-  if (room.users.length < 2) {
-    room.status = "waiting";
-  }
-
-  return true;
-}
-
-/**
- * Updates the cached list of restaurants for a room.
- */
-export function setRoomRestaurants(
+export async function setRoomRestaurants(
   roomId: string,
-  restaurants: Room["restaurants"],
-): boolean {
-  const room = rooms.get(roomId);
-  if (!room) return false;
-
-  room.restaurants = restaurants;
-  return true;
+  restaurants: Restaurant[],
+): Promise<boolean> {
+  const [result] = await exec([
+    ["SET", keys.restaurants(roomId), JSON.stringify(restaurants), "NX", "EX", ROOM_TTL_SECONDS],
+  ]);
+  return result === "OK";
 }
 
 /**
  * Records a user's swipe and checks for a mutual match.
  */
-export function recordSwipe(
+export async function recordSwipe(
   roomId: string,
   userId: string,
   restaurantId: string,
   direction: "left" | "right",
-): { success: boolean; isMatch: boolean } {
-  const room = rooms.get(roomId);
-  if (!room) return { success: false, isMatch: false };
+): Promise<{ success: boolean; isMatch: boolean }> {
+  const meta = await getMeta(roomId);
+  if (!meta) return { success: false, isMatch: false };
 
-  if (!room.swipes[userId]) {
-    room.swipes[userId] = [];
+  // Only right swipes matter for matching
+  if (direction === "left") {
+    await exec(touch(meta));
+    return { success: true, isMatch: false };
   }
 
-  room.swipes[userId].push({
-    restaurantId,
-    direction,
-    timestamp: Date.now(),
-  });
+  const [, , users] = await exec([
+    ["SADD", keys.likes(roomId, userId), restaurantId],
+    ["EXPIRE", keys.likes(roomId, userId), ROOM_TTL_SECONDS],
+    ["SMEMBERS", keys.users(roomId)],
+    ...touch(meta),
+  ]);
 
-  if (direction === "right") {
-    const otherUsers = room.users.filter((user) => user.id !== userId);
-
-    for (const otherUser of otherUsers) {
-      const theirSwipes = room.swipes[otherUser.id] || [];
-      const theyAlsoLikedIt = theirSwipes.some(
-        (swipe) => swipe.restaurantId === restaurantId && swipe.direction === "right",
-      );
-
-      if (theyAlsoLikedIt && !room.matches.includes(restaurantId)) {
-        room.matches.push(restaurantId);
-        return { success: true, isMatch: true };
-      }
+  for (const otherId of (users as string[]).filter((id) => id !== userId)) {
+    const [theyLikedIt] = await exec([["SISMEMBER", keys.likes(roomId, otherId), restaurantId]]);
+    if (theyLikedIt === 1) {
+      // SADD returns 1 only for the request that records the match first
+      const [added] = await exec([["SADD", keys.matches(roomId), restaurantId]]);
+      return { success: true, isMatch: added === 1 };
     }
   }
 
@@ -149,9 +170,11 @@ export function recordSwipe(
 }
 
 /**
- * Returns all active rooms (for debugging/admin purposes).
+ * Lists rooms created by this server in development (debug endpoint only).
  */
-export function getAllRooms(): Room[] {
-  return Array.from(rooms.values());
+export async function getAllRooms(): Promise<Room[]> {
+  if (!isDev) return [];
+  const [ids] = await exec([["SMEMBERS", keys.devIndex]]);
+  const rooms = await Promise.all((ids as string[]).map(getRoomById));
+  return rooms.filter((r): r is Room => Boolean(r));
 }
-

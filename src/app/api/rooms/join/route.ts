@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const room = getRoomByCode(code.toUpperCase());
+    const room = await getRoomByCode(code.toUpperCase());
 
     if (!room) {
       return NextResponse.json(
@@ -30,14 +30,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (room.users.length >= 2 && !room.users.some(u => u.id === userId)) {
+    if (room.users.length >= 2 && !room.users.includes(userId)) {
       return NextResponse.json(
         { error: 'Room is full' },
         { status: 400 }
       );
     }
 
-    const success = addUserToRoom(room.id, userId);
+    const success = await addUserToRoom(room.id, userId);
 
     if (!success) {
       return NextResponse.json(

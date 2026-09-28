@@ -22,16 +22,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure user is in room
-    const room = getRoomById(roomId);
+    const room = await getRoomById(roomId);
     if (!room) {
       return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
     // Auto-add user to room if not already in it
-    addUserToRoom(roomId, userId);
+    await addUserToRoom(roomId, userId);
 
     // Record the swipe and check for match
-    const result = recordSwipe(roomId, userId, restaurantId, direction);
+    const result = await recordSwipe(roomId, userId, restaurantId, direction);
 
     if (!result.success) {
       return NextResponse.json(

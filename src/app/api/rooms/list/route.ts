@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { getAllRooms } from "@/lib/room/manager";
 
-// Debug endpoint — only use during development to verify rooms are shared
+// Debug endpoint: development only
 export async function GET() {
-  const rooms = getAllRooms();
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  const rooms = await getAllRooms();
   return NextResponse.json({
     count: rooms.length,
     rooms: rooms.map((r) => ({
