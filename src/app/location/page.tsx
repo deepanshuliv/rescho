@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense, useSyncExternalStore } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button, PageShell, PageHeading } from "@/components/ui";
@@ -47,16 +47,18 @@ function LocationContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
-  const [isInIframe, setIsInIframe] = useState(false);
-
-  // Detect if running in iframe
-  useEffect(() => {
-    try {
-      setIsInIframe(window.self !== window.top);
-    } catch {
-      setIsInIframe(true); // If we can't access window.top, we're in an iframe
-    }
-  }, []);
+  // Detect if running in an iframe (GPS is blocked there)
+  const isInIframe = useSyncExternalStore(
+    () => () => {},
+    () => {
+      try {
+        return window.self !== window.top;
+      } catch {
+        return true; // If we can't access window.top, we're in an iframe
+      }
+    },
+    () => false,
+  );
 
   const detectLocation = useCallback(() => {
     // Check if in iframe first

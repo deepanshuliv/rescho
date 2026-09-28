@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { SwipeStack, MatchModal } from "@/components/swipe";
 import { Button, ShareModal, AppHeader, PageShell } from "@/components/ui";
 import { Restaurant } from "@/types";
 import Image from "next/image";
+import { useSessionItem } from "@/lib/ui/useSessionItem";
 import {
   X,
   Heart,
@@ -17,16 +18,8 @@ import {
   LogOut,
 } from "lucide-react";
 
-interface MatchData {
-  restaurantId: string;
-  restaurantName: string;
-  restaurant: Restaurant;
-}
-
 // Poll state from server every 2.5 seconds
 const POLL_INTERVAL = 2500;
-// On match check, poll faster for responsiveness
-const MATCH_POLL_INTERVAL = 1500;
 
 export default function SwipePage() {
   const params = useParams();
@@ -52,8 +45,26 @@ export default function SwipePage() {
   const [showMatches, setShowMatches] = useState(false);
   const [showShare, setShowShare] = useState(false);
 
+  // Values written to sessionStorage by the create/join pages
+  const storedRoomCode = useSessionItem("rescho_room_code");
+  const isCreator = useSessionItem("rescho_is_creator") === "true";
+  const cachedRaw = useSessionItem("rescho_restaurants");
+  const cachedRestaurants = useMemo<Restaurant[]>(() => {
+    if (!isCreator || !cachedRaw) return [];
+    try {
+      const parsed = JSON.parse(cachedRaw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return []; // ignore corrupt cache
+    }
+  }, [isCreator, cachedRaw]);
+
+  // The creator starts on the cached list; the server's copy replaces it on first poll
+  const displayRestaurants = restaurants.length > 0 ? restaurants : cachedRestaurants;
+  const showLoading = isLoading && displayRestaurants.length === 0;
+  const displayRoomCode = roomCode || storedRoomCode || "";
+
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const matchPollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initDoneRef = useRef(false);
   const restaurantsLoadedRef = useRef(false);
   const userIdRef = useRef<string | null>(null);
@@ -142,7 +153,6 @@ export default function SwipePage() {
     initDoneRef.current = true;
 
     const userId = sessionStorage.getItem("rescho_user_id");
-    const storedRoomCode = sessionStorage.getItem("rescho_room_code");
 
     if (!userId) {
       router.push("/");
@@ -150,26 +160,9 @@ export default function SwipePage() {
     }
 
     userIdRef.current = userId;
-    if (storedRoomCode) setRoomCode(storedRoomCode);
-
-    // Load cached restaurants instantly for creator
-    const isCreator = sessionStorage.getItem("rescho_is_creator") === "true";
-    const cachedRestaurants = sessionStorage.getItem("rescho_restaurants");
-    if (isCreator && cachedRestaurants) {
-      try {
-        const parsed = JSON.parse(cachedRestaurants) as Restaurant[];
-        if (parsed.length > 0) {
-          setRestaurants(parsed);
-          restaurantsLoadedRef.current = true;
-          setIsLoading(false);
-        }
-      } catch {
-        // ignore corrupt cache
-      }
-    }
 
     // Show loading message progression for joiner
-    if (!isCreator) {
+    if (sessionStorage.getItem("rescho_is_creator") !== "true") {
       const msgs = [
         "Connecting to room...",
         "Loading restaurant list...",
@@ -183,8 +176,8 @@ export default function SwipePage() {
       setTimeout(() => clearInterval(msgTimer), 12000);
     }
 
-    // Start polling immediately
-    pollRoomState();
+    // First poll right away; the interval effect below keeps it going
+    setTimeout(pollRoomState, 0);
   }, [router, pollRoomState]);
 
   // ─────────────────────────────────────────────────────────────
@@ -198,7 +191,6 @@ export default function SwipePage() {
 
     return () => {
       if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-      if (matchPollTimerRef.current) clearInterval(matchPollTimerRef.current);
     };
   }, [pollRoomState]);
 
@@ -261,7 +253,6 @@ export default function SwipePage() {
 
   const handleLeaveRoom = () => {
     if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-    if (matchPollTimerRef.current) clearInterval(matchPollTimerRef.current);
     sessionStorage.removeItem("rescho_room_id");
     sessionStorage.removeItem("rescho_room_code");
     sessionStorage.removeItem("rescho_is_creator");
@@ -272,7 +263,7 @@ export default function SwipePage() {
   // ─────────────────────────────────────────────────────────────
   // Render
   // ─────────────────────────────────────────────────────────────
-  if (isLoading) {
+  if (showLoading) {
     return (
       <div className="flex min-h-[100dvh] flex-col">
       <AppHeader />
@@ -351,13 +342,13 @@ export default function SwipePage() {
         center={
           <button
             type="button"
-            onClick={() => roomCode && setShowShare(true)}
+            onClick={() => displayRoomCode && setShowShare(true)}
             className="island group flex h-12 items-center gap-3 pl-5 pr-1.5"
-            aria-label={`Room code ${roomCode}. Share with your partner.`}
+            aria-label={`Room code ${displayRoomCode}. Share with your partner.`}
           >
             <span className="hidden text-[11px] font-medium text-text-muted sm:inline">Room</span>
             <span className="pl-[0.15em] font-mono text-[15px] font-bold tracking-[0.15em] text-accent-primary">
-              {roomCode}
+              {displayRoomCode}
             </span>
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.05] text-white/60 transition-colors group-hover:bg-white/[0.1] group-hover:text-white">
               <Share2 className="h-4 w-4" />
@@ -457,7 +448,7 @@ export default function SwipePage() {
       {/* Swipe Area */}
       <div className="flex-1 overflow-hidden px-4 py-5">
         <SwipeStack
-          restaurants={restaurants}
+          restaurants={displayRestaurants}
           onSwipe={handleSwipe}
           matchCount={matches.length}
           keyboardEnabled={!showMatchModal && !showMatches && !showShare}
@@ -492,14 +483,14 @@ export default function SwipePage() {
       />
 
       {/* Share Modal */}
-      {roomCode && (
+      {displayRoomCode && (
         <ShareModal
           isOpen={showShare}
           onClose={() => setShowShare(false)}
-          roomCode={roomCode}
+          roomCode={displayRoomCode}
           url={
             typeof window !== "undefined"
-              ? `${window.location.origin}/room/join?code=${roomCode}`
+              ? `${window.location.origin}/room/join?code=${displayRoomCode}`
               : ""
           }
         />
