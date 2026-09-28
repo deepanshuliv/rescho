@@ -77,7 +77,7 @@ export default function CreateRoomPage() {
       setIsLoading(false);
 
       // Step 2: Pre-fetch restaurants and cache them for instant load on swipe page
-      prefetchAndRegisterRestaurants(loc, data.roomId);
+      prefetchAndRegisterRestaurants(data.roomId);
     } catch (err) {
       console.error(err);
       setError("Failed to create room. Please try again.");
@@ -85,31 +85,20 @@ export default function CreateRoomPage() {
     }
   };
 
-  const prefetchAndRegisterRestaurants = async (
-    loc: LocationData,
-    createdRoomId: string,
-  ) => {
+  const prefetchAndRegisterRestaurants = async (createdRoomId: string) => {
     try {
+      // The state endpoint fetches and stores the room's list server-side.
+      // Caching that exact list guarantees both partners swipe the same cards.
+      const userId = sessionStorage.getItem("rescho_user_id");
+      if (!userId || !createdRoomId) return;
       const response = await fetch(
-        `/api/restaurants?lat=${loc.lat}&lng=${loc.lng}&limit=15`,
+        `/api/rooms/${createdRoomId}/state?userId=${encodeURIComponent(userId)}`,
+        { cache: "no-store" },
       );
       const data = await response.json();
-      if (data.restaurants && data.restaurants.length > 0) {
+      if (data.restaurants?.length > 0) {
         // Cache locally for instant load on swipe page
-        sessionStorage.setItem(
-          "rescho_restaurants",
-          JSON.stringify(data.restaurants),
-        );
-      }
-
-      // Register restaurants server-side by triggering the state endpoint
-      // This ensures the joiner gets the same list when they poll
-      const userId = sessionStorage.getItem("rescho_user_id");
-      if (userId && createdRoomId) {
-        await fetch(
-          `/api/rooms/${createdRoomId}/state?userId=${encodeURIComponent(userId)}`,
-          { cache: "no-store" },
-        );
+        sessionStorage.setItem("rescho_restaurants", JSON.stringify(data.restaurants));
       }
     } catch (err) {
       console.error(
