@@ -99,7 +99,7 @@ export default function MatchModal({
               role="dialog"
               aria-modal="true"
               aria-labelledby="match-title"
-              className="surface-glow rounded-[2rem] max-w-sm w-full overflow-hidden"
+              className="surface-glow rounded-[2rem] max-w-sm w-full overflow-hidden bg-[#0c0c10]"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header art: same treatment as the swipe card */}

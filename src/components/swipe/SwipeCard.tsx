@@ -106,7 +106,7 @@ export default function SwipeCard({
               draggable={false}
               width={56}
               height={56}
-              className="h-full w-full object-cover opacity-90"
+              className="h-full w-full object-contain p-2.5 opacity-80"
               unoptimized
             />
           </div>
