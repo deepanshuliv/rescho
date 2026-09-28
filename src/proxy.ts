@@ -3,11 +3,15 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // Only protect the room creation route — joining is fully public
 const isProtectedRoute = createRouteMatcher(["/room/create(.*)"]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+export default clerkMiddleware(
+  async (auth, req) => {
+    if (isProtectedRoute(req)) {
+      await auth.protect();
+    }
+  },
+  // Send signed-out users to our own styled pages, not Clerk's hosted ones
+  { signInUrl: "/sign-in", signUpUrl: "/sign-up" },
+);
 
 export const config = {
   matcher: [
