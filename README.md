@@ -135,8 +135,6 @@ Vercel runs API routes as separate serverless functions that do not share memory
 
 From the original proposal: choosing cuisine and meal type (breakfast, lunch, dinner) when creating a room, and fetching suggestions based on those choices.
 
-`rescho-restaurant-matcher.md` is the original implementation plan. It describes a Socket.io server that was never built; the app uses the polling approach above instead.
-
 ## License
 
 No license file is included.
