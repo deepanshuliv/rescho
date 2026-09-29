@@ -18,22 +18,3 @@ export interface Room {
   status: 'waiting' | 'active';
   createdAt: number;
 }
-
-export interface CreateRoomRequest {
-  location: Location;
-}
-
-export interface CreateRoomResponse {
-  roomId: string;
-  code: string;
-}
-
-export interface JoinRoomRequest {
-  code: string;
-  userId: string;
-}
-
-export interface JoinRoomResponse {
-  roomId: string;
-  location: Location;
-}
