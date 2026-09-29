@@ -114,31 +114,6 @@ const CUISINE_GRADIENTS: Record<string, string> = {
   default: "linear-gradient(135deg, #37474f 0%, #263238 50%, #1a1a2e 100%)",
 };
 
-const CUISINE_EMOJIS: Record<string, string> = {
-  Indian: "🍛",
-  Chinese: "🥡",
-  Japanese: "🍣",
-  Italian: "🍝",
-  Pizza: "🍕",
-  Mexican: "🌮",
-  Thai: "🍜",
-  French: "🥐",
-  Mediterranean: "🫒",
-  American: "🍔",
-  "Fast Food": "🍟",
-  Burger: "🍔",
-  Sandwich: "🥪",
-  Cafe: "☕",
-  Coffee: "☕",
-  Seafood: "🦐",
-  BBQ: "🥩",
-  Korean: "🍲",
-  Vietnamese: "🍜",
-  Greek: "🥗",
-  Steakhouse: "🥩",
-  Brunch: "🥞",
-  default: "🍽️",
-};
 
 function getCuisineGradient(cuisineName: string): string {
   if (CUISINE_GRADIENTS[cuisineName]) return CUISINE_GRADIENTS[cuisineName];
@@ -148,16 +123,6 @@ function getCuisineGradient(cuisineName: string): string {
     if (lowerName.includes(lowerKey) || lowerKey.includes(lowerName)) return gradient;
   }
   return CUISINE_GRADIENTS["default"];
-}
-
-function getCuisineEmoji(cuisineName: string): string {
-  if (CUISINE_EMOJIS[cuisineName]) return CUISINE_EMOJIS[cuisineName];
-  const lowerName = cuisineName.toLowerCase();
-  for (const [key, emoji] of Object.entries(CUISINE_EMOJIS)) {
-    const lowerKey = key.toLowerCase();
-    if (lowerName.includes(lowerKey) || lowerKey.includes(lowerName)) return emoji;
-  }
-  return CUISINE_EMOJIS["default"];
 }
 
 /**
@@ -182,9 +147,7 @@ function buildRestaurant(place: FoursquarePlace): Restaurant {
     cuisine: cuisineName,
     image: getCategoryIconUrl(place),
     gradient: getCuisineGradient(cuisineName),
-    emoji: getCuisineEmoji(cuisineName),
     address,
-    distance: place.distance,
     rating: place.rating,
     priceLevel,
   };
@@ -216,9 +179,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Italian",
       image: "https://ss3.4sqi.net/img/categories_v2/food/italian_88.png",
       gradient: CUISINE_GRADIENTS["Italian"],
-      emoji: CUISINE_EMOJIS["Italian"],
       address: "123 Main Street",
-      distance: 500,
       rating: 8.5,
       priceLevel: "$$",
     },
@@ -229,9 +190,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Japanese",
       image: "https://ss3.4sqi.net/img/categories_v2/food/sushi_88.png",
       gradient: CUISINE_GRADIENTS["Japanese"],
-      emoji: CUISINE_EMOJIS["Japanese"],
       address: "456 Oak Avenue",
-      distance: 800,
       rating: 9.0,
       priceLevel: "$$$",
     },
@@ -242,9 +201,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Mexican",
       image: "https://ss3.4sqi.net/img/categories_v2/food/mexican_88.png",
       gradient: CUISINE_GRADIENTS["Mexican"],
-      emoji: CUISINE_EMOJIS["Mexican"],
       address: "789 Elm Street",
-      distance: 300,
       rating: 8.0,
       priceLevel: "$",
     },
@@ -255,9 +212,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "French",
       image: "https://ss3.4sqi.net/img/categories_v2/food/french_88.png",
       gradient: CUISINE_GRADIENTS["French"],
-      emoji: CUISINE_EMOJIS["French"],
       address: "321 Pine Road",
-      distance: 1200,
       rating: 9.2,
       priceLevel: "$$$$",
     },
@@ -268,9 +223,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Chinese",
       image: "https://ss3.4sqi.net/img/categories_v2/food/asian_88.png",
       gradient: CUISINE_GRADIENTS["Chinese"],
-      emoji: CUISINE_EMOJIS["Chinese"],
       address: "654 Maple Lane",
-      distance: 600,
       rating: 8.8,
       priceLevel: "$$",
     },
@@ -281,9 +234,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Indian",
       image: "https://ss3.4sqi.net/img/categories_v2/food/indian_88.png",
       gradient: CUISINE_GRADIENTS["Indian"],
-      emoji: CUISINE_EMOJIS["Indian"],
       address: "987 Cedar Court",
-      distance: 900,
       rating: 8.7,
       priceLevel: "$$",
     },
@@ -294,9 +245,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "American",
       image: "https://ss3.4sqi.net/img/categories_v2/food/burger_88.png",
       gradient: CUISINE_GRADIENTS["American"],
-      emoji: CUISINE_EMOJIS["American"],
       address: "147 Birch Boulevard",
-      distance: 400,
       rating: 7.9,
       priceLevel: "$",
     },
@@ -307,9 +256,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Mediterranean",
       image: "https://ss3.4sqi.net/img/categories_v2/food/mediterranean_88.png",
       gradient: CUISINE_GRADIENTS["Mediterranean"],
-      emoji: CUISINE_EMOJIS["Mediterranean"],
       address: "258 Walnut Way",
-      distance: 1000,
       rating: 8.6,
       priceLevel: "$$$",
     },
@@ -320,9 +267,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Thai",
       image: "https://ss3.4sqi.net/img/categories_v2/food/thai_88.png",
       gradient: CUISINE_GRADIENTS["Thai"],
-      emoji: CUISINE_EMOJIS["Thai"],
       address: "369 Spruce Street",
-      distance: 700,
       rating: 8.9,
       priceLevel: "$$",
     },
@@ -333,9 +278,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Italian",
       image: "https://ss3.4sqi.net/img/categories_v2/food/italian_88.png",
       gradient: CUISINE_GRADIENTS["Italian"],
-      emoji: CUISINE_EMOJIS["Italian"],
       address: "741 Ash Avenue",
-      distance: 1500,
       rating: 8.3,
       priceLevel: "$$",
     },
@@ -346,9 +289,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Korean BBQ",
       image: "https://ss3.4sqi.net/img/categories_v2/food/korean_88.png",
       gradient: CUISINE_GRADIENTS["Korean"],
-      emoji: CUISINE_EMOJIS["Korean"],
       address: "82 Willow Drive",
-      distance: 400,
       rating: 9.1,
       priceLevel: "$$",
     },
@@ -359,9 +300,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Steakhouse",
       image: "https://ss3.4sqi.net/img/categories_v2/food/steakhouse_88.png",
       gradient: CUISINE_GRADIENTS["Steakhouse"],
-      emoji: CUISINE_EMOJIS["Steakhouse"],
       address: "14 Harbour Lane",
-      distance: 1300,
       rating: 9.3,
       priceLevel: "$$$$",
     },
@@ -372,9 +311,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Brunch",
       image: "https://ss3.4sqi.net/img/categories_v2/food/breakfast_88.png",
       gradient: CUISINE_GRADIENTS["Brunch"],
-      emoji: CUISINE_EMOJIS["Brunch"],
       address: "5 Morning Circle",
-      distance: 200,
       rating: 8.4,
       priceLevel: "$$",
     },
@@ -385,9 +322,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Vietnamese",
       image: "https://ss3.4sqi.net/img/categories_v2/food/vietnamese_88.png",
       gradient: CUISINE_GRADIENTS["Vietnamese"],
-      emoji: CUISINE_EMOJIS["Vietnamese"],
       address: "210 Lotus Road",
-      distance: 600,
       rating: 8.8,
       priceLevel: "$",
     },
@@ -398,9 +333,7 @@ function getMockRestaurants(): Restaurant[] {
       cuisine: "Indian",
       image: "https://ss3.4sqi.net/img/categories_v2/food/indian_88.png",
       gradient: CUISINE_GRADIENTS["Indian"],
-      emoji: CUISINE_EMOJIS["Indian"],
       address: "99 Spice Avenue",
-      distance: 500,
       rating: 8.6,
       priceLevel: "$$",
     },

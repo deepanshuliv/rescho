@@ -5,9 +5,7 @@ export interface Restaurant {
   cuisine: string;
   image: string;
   gradient?: string;
-  emoji?: string;
   address: string;
-  distance?: number;
   rating?: number;
   priceLevel?: string;
 }
