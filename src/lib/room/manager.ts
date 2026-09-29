@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from "uuid";
 /** Rooms expire after two hours without activity. */
 const ROOM_TTL_SECONDS = 2 * 60 * 60;
 const MAX_USERS = 2;
-const isDev = process.env.NODE_ENV !== "production";
 
 interface RoomMeta {
   id: string;
@@ -22,7 +21,6 @@ const keys = {
   restaurants: (roomId: string) => `room:${roomId}:restaurants`,
   likes: (roomId: string, userId: string) => `room:${roomId}:likes:${userId}`,
   matches: (roomId: string) => `room:${roomId}:matches`,
-  devIndex: "rooms:dev-index",
 };
 
 /** Extends the lifetime of every key belonging to a room. */
@@ -59,7 +57,6 @@ export async function createRoom(location: Location): Promise<Room> {
 
   await exec([
     ["SET", keys.meta(meta.id), JSON.stringify(meta), "EX", ROOM_TTL_SECONDS],
-    ...(isDev ? [["SADD", keys.devIndex, meta.id]] : []),
   ]);
 
   return { ...meta, users: [], restaurants: [], matches: [], status: "waiting" };
@@ -167,14 +164,4 @@ export async function recordSwipe(
   }
 
   return { success: true, isMatch: false };
-}
-
-/**
- * Lists rooms created by this server in development (debug endpoint only).
- */
-export async function getAllRooms(): Promise<Room[]> {
-  if (!isDev) return [];
-  const [ids] = await exec([["SMEMBERS", keys.devIndex]]);
-  const rooms = await Promise.all((ids as string[]).map(getRoomById));
-  return rooms.filter((r): r is Room => Boolean(r));
 }

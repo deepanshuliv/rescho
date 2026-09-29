@@ -69,15 +69,12 @@ All routes are in `src/app/api/`.
 | `POST /api/rooms/join` | Join by `{ code, userId }` |
 | `GET /api/rooms/[roomId]/state?userId=` | Room status, partner presence, restaurant list, match IDs |
 | `POST /api/rooms/swipe` | Record `{ roomId, userId, restaurantId, direction }`, report a match |
-| `GET /api/rooms/[roomId]/matches` | Matched restaurants as full objects |
-| `GET /api/restaurants?lat=&lng=&limit=` | Restaurant search (Foursquare or mock) |
-| `GET /api/rooms/list` | Debug listing of rooms (development only; 404 in production) |
 | `GET /health` | Health check used by Render |
 
-The restaurant endpoint works without a Foursquare key, which makes it a quick way to check the server:
+To check the server is up:
 
 ```bash
-curl "http://localhost:3000/api/restaurants?lat=28.6139&lng=77.209&limit=3"
+curl "http://localhost:3000/health"
 ```
 
 ## Project structure
