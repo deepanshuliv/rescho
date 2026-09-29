@@ -13,7 +13,7 @@ type Command = (string | number)[];
 const REDIS_URL = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
-export const usingRedis = Boolean(REDIS_URL && REDIS_TOKEN);
+const usingRedis = Boolean(REDIS_URL && REDIS_TOKEN);
 
 /** Runs commands in order and returns each command's result. */
 export async function exec(commands: Command[]): Promise<unknown[]> {
