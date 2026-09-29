@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:render": "next start",
     "lint": "eslint"
   },
   "dependencies": {
