@@ -47,6 +47,6 @@ next-env.d.ts
 /.clerk/
 
 # agent skills installed locally (not part of the app)
-/.agents/skills/
+/.agents/
 /.claude/
 skills-lock.json
