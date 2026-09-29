@@ -88,7 +88,6 @@ export default function CreateRoomPage() {
 
         const data = await response.json();
         sessionStorage.setItem("rescho_user_id", userId);
-        sessionStorage.setItem("rescho_room_id", data.roomId);
         sessionStorage.setItem("rescho_room_code", data.code);
         sessionStorage.setItem("rescho_is_creator", "true");
 

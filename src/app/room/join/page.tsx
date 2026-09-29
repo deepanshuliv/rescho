@@ -68,7 +68,6 @@ function JoinRoomContent() {
 
       // Store session data
       sessionStorage.setItem("rescho_user_id", userId);
-      sessionStorage.setItem("rescho_room_id", data.roomId);
       sessionStorage.setItem("rescho_room_code", code);
       sessionStorage.setItem("rescho_location", JSON.stringify(data.location));
       sessionStorage.setItem("rescho_is_creator", "false");

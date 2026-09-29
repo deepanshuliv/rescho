@@ -253,7 +253,6 @@ export default function SwipePage() {
 
   const handleLeaveRoom = () => {
     if (pollTimerRef.current) clearInterval(pollTimerRef.current);
-    sessionStorage.removeItem("rescho_room_id");
     sessionStorage.removeItem("rescho_room_code");
     sessionStorage.removeItem("rescho_is_creator");
     sessionStorage.removeItem("rescho_restaurants");
