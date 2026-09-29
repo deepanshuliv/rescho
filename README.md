@@ -2,7 +2,7 @@
 
 A web app for two people to decide where to eat: both join a room with a 6-character code, swipe through nearby restaurants, and get a match when they both swipe right on the same place.
 
-Personal project. Runs locally with no external services beyond Clerk, and deploys to Vercel with an Upstash Redis store (see [Deploying to Vercel](#deploying-to-vercel)).
+Personal project. Live at https://rescho.deepanshu.live, hosted on Render (see [Deploying](#deploying)).
 
 ## Quick start
 
@@ -22,7 +22,7 @@ cp .env.example .env.local
 | --- | --- | --- |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Yes | Clerk sign-in, needed to create a room. The build fails without the publishable key. |
 | `FOURSQUARE_API_KEY` | No | Real restaurant data. Without it, 15 built-in mock restaurants are served. |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | On Vercel | Shared room storage. Locally, rooms fall back to process memory. `KV_REST_API_URL` / `KV_REST_API_TOKEN` are also accepted. |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Serverless only | Shared room storage. Without it, rooms live in process memory. `KV_REST_API_URL` / `KV_REST_API_TOKEN` are also accepted. |
 
 ```bash
 npm run dev
@@ -41,6 +41,7 @@ Open http://localhost:3000. To try the full flow alone, use two browser windows 
 | `npm run dev` | Next.js dev server |
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build |
+| `npm run start:render` | Same as `start`; the start command configured on Render |
 | `npm run lint` | ESLint |
 
 There is no test suite.
@@ -71,6 +72,7 @@ All routes are in `src/app/api/`.
 | `GET /api/rooms/[roomId]/matches` | Matched restaurants as full objects |
 | `GET /api/restaurants?lat=&lng=&limit=` | Restaurant search (Foursquare or mock) |
 | `GET /api/rooms/list` | Debug listing of rooms (development only; 404 in production) |
+| `GET /health` | Health check used by Render |
 
 The restaurant endpoint works without a Foursquare key, which makes it a quick way to check the server:
 
@@ -101,16 +103,31 @@ src/
 
 Stack: Next.js 16, React 19, TypeScript, Tailwind CSS 4, Framer Motion, Clerk, axios.
 
-## Deploying to Vercel
+## Deploying
 
-1. Import the repository in Vercel. The framework preset is detected as Next.js; no build settings need changing. `package-lock.json` is the only lockfile, so Vercel installs with npm.
-2. In **Storage**, connect an **Upstash Redis** database to the project. This sets the Redis REST credentials. Without it, each serverless function has its own memory, and rooms created in one request are not found in the next.
-3. In **Settings → Environment Variables**, add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` and, optionally, `FOURSQUARE_API_KEY`.
-4. Redeploy.
+### Render (current production)
+
+A Render web service builds from `main` and runs:
+
+| Setting | Value |
+| --- | --- |
+| Start command | `npm run start:render` (alias for `next start`, which listens on Render's `PORT`) |
+| Health check path | `/health` |
+| Environment | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `FOURSQUARE_API_KEY` |
+
+Render runs one long-lived Node process, so rooms work from process memory without Redis. They are lost whenever the service restarts or redeploys; adding the Upstash variables keeps them across restarts.
+
+### Vercel
+
+Vercel runs API routes as separate serverless functions that do not share memory, so it needs Upstash Redis:
+
+1. Import the repository. The Next.js preset needs no build changes; `package-lock.json` is the only lockfile, so Vercel installs with npm.
+2. In **Storage**, connect an **Upstash Redis** database. This sets the Redis REST credentials.
+3. Add the Clerk keys (and optionally `FOURSQUARE_API_KEY`) under **Settings → Environment Variables**, then deploy.
 
 ## Limitations
 
-- **Without Redis, rooms live in process memory.** That is fine for `npm run dev` or a single `npm run start` process, but not for serverless or multi-instance hosting.
+- **Without Redis, rooms live in process memory.** That works for `npm run dev` or a single server process (as on Render), but rooms reset on restart and cannot be shared across serverless or multiple instances.
 - **Location search depends on Nominatim**, a free public service with its own usage policy.
 - **No tests or CI.**
 
