@@ -59,7 +59,7 @@ export async function createRoom(location: Location): Promise<Room> {
     ["SET", keys.meta(meta.id), JSON.stringify(meta), "EX", ROOM_TTL_SECONDS],
   ]);
 
-  return { ...meta, users: [], restaurants: [], matches: [], status: "waiting" };
+  return { ...meta, users: [], restaurants: [], matches: [] };
 }
 
 /**
@@ -81,7 +81,6 @@ export async function getRoomById(roomId: string): Promise<Room | undefined> {
     users: userIds,
     restaurants: restaurants ? (JSON.parse(restaurants as string) as Restaurant[]) : [],
     matches: (matches as string[]) ?? [],
-    status: userIds.length >= MAX_USERS ? "active" : "waiting",
   };
 }
 

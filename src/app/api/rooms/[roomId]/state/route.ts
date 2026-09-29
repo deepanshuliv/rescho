@@ -50,14 +50,10 @@ export async function GET(
     }
 
     return NextResponse.json({
-      roomId: updatedRoom.id,
       code: updatedRoom.code,
-      status: updatedRoom.status,
-      userCount: updatedRoom.users.length,
       partnerConnected: updatedRoom.users.length >= 2,
       restaurants: updatedRoom.restaurants,
       matches: updatedRoom.matches,
-      location: updatedRoom.location,
     });
   } catch (error) {
     console.error("Room state error:", error);

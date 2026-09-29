@@ -15,6 +15,5 @@ export interface Room {
   restaurants: Restaurant[];
   /** Restaurant IDs both users swiped right on. */
   matches: string[];
-  status: 'waiting' | 'active';
   createdAt: number;
 }

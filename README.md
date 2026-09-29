@@ -67,7 +67,7 @@ All routes are in `src/app/api/`.
 | --- | --- |
 | `POST /api/rooms/create` | Create a room from `{ location, userId? }` |
 | `POST /api/rooms/join` | Join by `{ code, userId }` |
-| `GET /api/rooms/[roomId]/state?userId=` | Room status, partner presence, restaurant list, match IDs |
+| `GET /api/rooms/[roomId]/state?userId=` | Room code, partner presence, restaurant list, match IDs |
 | `POST /api/rooms/swipe` | Record `{ roomId, userId, restaurantId, direction }`, report a match |
 | `GET /health` | Health check used by Render |
 
